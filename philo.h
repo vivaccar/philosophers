@@ -4,15 +4,32 @@
 # include <stdio.h>
 # include <pthread.h>
 # include <limits.h>
+# include <stdlib.h>
+
+typedef struct s_philo
+{
+    int         id;
+}               t_philo;
+
 
 typedef struct s_data
 {
-    long    n_philos;
-    long    time_to_die;
-    long    time_to_eat;
-    long    time_to_sleep;
-    int     n_eat;
+    long        n_philos;
+    long        time_to_die;
+    long        time_to_eat;
+    long        time_to_sleep;
+    long        n_eat;
+    t_philo     *philo;
 }               t_data;
 
+
+
+// Checking parameters
+int     set_values(int ac, char **av, t_data *data);
+int	    ft_isdigit(int c);
+long	ft_atol(const char *str);
+int     check_parameters(int ac, char **av);
+int     check_timestamps(t_data *data);
+int     fill_data(int ac, char **av, t_data *data);
 
 #endif

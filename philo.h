@@ -5,10 +5,18 @@
 # include <pthread.h>
 # include <limits.h>
 # include <stdlib.h>
+# include <sys/time.h>
+
+typedef struct s_fork
+{
+    int         id;
+}               t_fork;
 
 typedef struct s_philo
 {
     int         id;
+    t_fork      *right_fork;
+    t_fork      *left_fork;
 }               t_philo;
 
 
@@ -20,6 +28,7 @@ typedef struct s_data
     long        time_to_sleep;
     long        n_eat;
     t_philo     *philo;
+    t_fork      *forks;
 }               t_data;
 
 

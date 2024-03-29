@@ -6,17 +6,17 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:10:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/03/29 17:57:41 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/03/29 18:36:12 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int	ft_atoi(const char *str)
+long	ft_atoi(const char *str)
 {
-	int	i;
-	int	result;
-	int	signal;
+	int		i;
+	long	result;
+	long	signal;
 
 	signal = 1;
 	i = 0;
@@ -59,10 +59,8 @@ int	argument_is_number(int ac, char **av)
 	return (1);
 }
 
-int	error_philo(char *msg, t_data *data)
+int	error_philo(char *msg)
 {
-	if (data)
-		free(data);
 	printf("%s", msg);
 	return (0);
 }
@@ -70,27 +68,27 @@ int	error_philo(char *msg, t_data *data)
 int	check_overflow_and_signal(t_data *data)
 {
 	if (data->n_philos < 1)
-		return (error_philo("Error: Must have at least 1 philosopher\n", data));
+		return (error_philo("Error: Must have at least 1 philosopher\n"));
 	if (data->time_to_die < 0 || data->time_to_eat < 0 || data->time_to_sleep < 0)
-		return (error_philo("Error: Only positive numbers as parameters!\n", data));
+		return (error_philo("Error: Only positive numbers as parameters!\n"));
+	if (data->n_philos > INT_MAX || data->repeat > INT_MAX || data->time_to_eat >INT_MAX
+		|| data->time_to_sleep > INT_MAX || data->time_to_die > INT_MAX)
+		return (error_philo("Error: INT_MAX is 2147483647!\n"));
 	return (1);
 }
 
 int	init_data(char **av, t_data *data)
 {
-	data = malloc(sizeof(t_data));
-	if (!data)
-		return (error_philo("Error: Data malloc\n", NULL));
 	data->n_philos = ft_atoi(av[1]);
 	data->time_to_die = ft_atoi(av[2]);
 	data->time_to_eat = ft_atoi(av[3]);
 	data->time_to_sleep = ft_atoi(av[4]);
-	if (av[5] && ft_atoi(av[5]) > 0)
+	if (av[5] && ft_atoi(av[5]) >= 0)
 		data->repeat = ft_atoi(av[5]);
 	else if (!av[5])
 		data->repeat = -1;
 	else
-		return (error_philo("Error: Only positive numbers as parameters!\n", data));
+		return (error_philo("Error: Only positive numbers as parameters!\n"));
 	if (!check_overflow_and_signal(data))
 		return (0);
 	return (1);
@@ -99,9 +97,9 @@ int	init_data(char **av, t_data *data)
 int	init_input(int ac, char **av, t_data *data)
 {
 	if (ac != 5 && ac != 6)
-		return (error_philo("Error: Invalid number of arguments!\n", NULL));
+		return (error_philo("Error: Invalid number of arguments!\n"));
 	if (!argument_is_number(ac, av))
-		return (error_philo("Error: Arguments must be numbers!\n", NULL));
+		return (error_philo("Error: Arguments must be numbers!\n"));
 	if (!init_data(av, data))
 		return (0);
 	return (1);
@@ -109,10 +107,13 @@ int	init_input(int ac, char **av, t_data *data)
 
 int	main(int ac, char **av)
 {
-	t_data	*data;
+	t_data	data;
 
-	data = NULL;
-	if (!init_input(ac, av, data))
+	if (!init_input(ac, av, &data))
 		return (0);
-	free(data);
+	printf("Philos: %li\n", data.n_philos);
+	printf("Time to die: %li\n", data.time_to_die);
+	printf("Time to eat: %li\n", data.time_to_eat);
+	printf("Time to sleep: %li\n", data.time_to_sleep);
+	printf("Repeat: %li\n", data.repeat);
 }

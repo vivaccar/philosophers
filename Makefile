@@ -1,4 +1,4 @@
-SRCS	=	philo.c check_parameters.c
+SRCS	=	philo.c
 
 OBJS	=	$(SRCS:.c=.o)
 

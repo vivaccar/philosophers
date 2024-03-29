@@ -1,105 +1,118 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/03/29 16:10:03 by vivaccar          #+#    #+#             */
+/*   Updated: 2024/03/29 17:57:41 by vivaccar         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
-int     ft_error(char *str, t_data *data)
+int	ft_atoi(const char *str)
 {
-    free(data);
-    printf("%s", str);
-    return (0);
+	int	i;
+	int	result;
+	int	signal;
+
+	signal = 1;
+	i = 0;
+	result = 0;
+	while ((str[i] >= 9 && str[i] <= 13) || (str[i] == ' '))
+		i++;
+	if ((str[i] == '+' || str[i] == '-'))
+	{
+		if (str[i] == '-')
+			signal = signal * -1;
+		i++;
+	}
+	while ((str[i] >= '0' && str[i] <= '9'))
+	{
+		result = result * 10 + str[i] - '0';
+		i++;
+	}
+	return (result * signal);
 }
 
-int    alloc_structures(t_data *data)
+int	argument_is_number(int ac, char **av)
 {
-    data->forks = malloc(sizeof(t_fork) * data->n_philos);
-    if (!data->forks)
-        return (ft_error("Forks malloc error.\n", data));
-    data->philo = malloc(sizeof(t_philo) * data->n_philos);
-    if (!data->philo)
-        return (ft_error("Philos malloc error.\n", data));
-    return (1);
+	int	i;
+	int	j;
+
+	i = 1;
+	while (i < ac)
+	{
+		j = 0;
+		while (av[i][j])
+		{
+			if(av[i][0] == '-' && j == 0)
+				j++;
+			if (av[i][j] > '9' || av[i][j] < '0')
+				return (0);
+			j++;
+		}
+		i++;
+	}
+	return (1);
 }
 
-void    init_philos(t_data *data)
+int	error_philo(char *msg, t_data *data)
 {
-    int i;
-    int j;
-
-    i = 1;
-    j = 0;
-    while (i <= data->n_philos)
-    {
-        data->philo[j].id = i;
-        data->philo[j].right_fork = &data->forks[j];
-        if (i == data->n_philos)
-            data->philo[j].left_fork = &data->forks[0];
-        else
-            data->philo[j].left_fork = &data->forks[j + 1];
-        i++;
-        j++;
-    }
+	if (data)
+		free(data);
+	printf("%s", msg);
+	return (0);
 }
 
-void    init_forks(t_data *data)
+int	check_overflow_and_signal(t_data *data)
 {
-    int i;
-    int j;
-
-    i = 1;
-    j = 0;
-    while (i <= data->n_philos)
-    {
-        data->forks[j].id = i;
-        i++;
-        j++;
-    }
+	if (data->n_philos < 1)
+		return (error_philo("Error: Must have at least 1 philosopher\n", data));
+	if (data->time_to_die < 0 || data->time_to_eat < 0 || data->time_to_sleep < 0)
+		return (error_philo("Error: Only positive numbers as parameters!\n", data));
+	return (1);
 }
 
-void    init_structures(t_data *data)
+int	init_data(char **av, t_data *data)
 {
-    init_forks(data);
-    init_philos(data);
+	data = malloc(sizeof(t_data));
+	if (!data)
+		return (error_philo("Error: Data malloc\n", NULL));
+	data->n_philos = ft_atoi(av[1]);
+	data->time_to_die = ft_atoi(av[2]);
+	data->time_to_eat = ft_atoi(av[3]);
+	data->time_to_sleep = ft_atoi(av[4]);
+	if (av[5] && ft_atoi(av[5]) > 0)
+		data->repeat = ft_atoi(av[5]);
+	else if (!av[5])
+		data->repeat = -1;
+	else
+		return (error_philo("Error: Only positive numbers as parameters!\n", data));
+	if (!check_overflow_and_signal(data))
+		return (0);
+	return (1);
 }
 
-void    end(t_data *data)
+int	init_input(int ac, char **av, t_data *data)
 {
-    free(data->forks);
-    free(data->philo);
+	if (ac != 5 && ac != 6)
+		return (error_philo("Error: Invalid number of arguments!\n", NULL));
+	if (!argument_is_number(ac, av))
+		return (error_philo("Error: Arguments must be numbers!\n", NULL));
+	if (!init_data(av, data))
+		return (0);
+	return (1);
 }
 
-int main(int ac, char **av)
+int	main(int ac, char **av)
 {
-    t_data  data;
-    //struct  timeval tv;
+	t_data	*data;
 
-    if (!set_values(ac, av, &data))
-        return (0);
-    if (!alloc_structures(&data))
-        return (0);
-    init_structures(&data);
-    int i, j;
-    i = 1;
-    j = 0;
-    while (i <= data.n_philos)
-    {
-        printf("Philo %i id: %i | Right fork id: %i | Left fork id: %i\n", i, data.philo[j].id, data.philo[j].right_fork->id, data.philo[j].left_fork->id);
-        i++;
-        j++;
-    }
-    /*printf("Number of philos: %ld\n", data.n_philos);
-    printf("Time to die: %ld\n", data.time_to_die);
-    printf("Time to eat: %ld\n", data.time_to_eat);
-    printf("Time to sleep: %ld\n", data.time_to_sleep);
-    printf("Number of eats: %ld\n", data.n_eat);*/
-
-    /* forks
-    i = 1;
-    j = 0;
-    while (i <= data.n_philos)
-    {
-        printf("Fork %i id: %i\n", i, data.forks[j].id);
-        i++;
-        j++;
-    }*/
-    end(&data);
-    //gettimeofday(&tv, NULL);
-    //printf("Time: %li", (tv.tv_sec * (u_int64_t)1000) + (tv.tv_usec / 1000));
+	data = NULL;
+	if (!init_input(ac, av, data))
+		return (0);
+	free(data);
 }

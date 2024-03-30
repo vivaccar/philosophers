@@ -6,114 +6,100 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:10:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/03/29 18:36:12 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/03/30 18:15:20 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-long	ft_atoi(const char *str)
+void	*test(void *data)
 {
+	t_philo	*philo;
 	int		i;
-	long	result;
-	long	signal;
 
-	signal = 1;
+	philo = (t_philo *)data;
 	i = 0;
-	result = 0;
-	while ((str[i] >= 9 && str[i] <= 13) || (str[i] == ' '))
-		i++;
-	if ((str[i] == '+' || str[i] == '-'))
+
+	while (i < 10)
 	{
-		if (str[i] == '-')
-			signal = signal * -1;
+		pthread_mutex_lock(&philo->right_fork->mtx);
+		pthread_mutex_lock(&philo->left_fork->mtx);
+		printf("Philo %i took the fork %i\n", philo->id, philo->right_fork->id);
+		printf("Philo %i took the fork %i\n", philo->id, philo->left_fork->id);
+		printf("Philo %i is eating\n", philo->id);
+		printf("Philo %i drop the fork %i\n", philo->id, philo->right_fork->id);
+		printf("Philo %i drop the fork %i\n", philo->id, philo->left_fork->id);
+		pthread_mutex_unlock(&philo->right_fork->mtx);
+		pthread_mutex_unlock(&philo->left_fork->mtx);
 		i++;
 	}
-	while ((str[i] >= '0' && str[i] <= '9'))
-	{
-		result = result * 10 + str[i] - '0';
-		i++;
-	}
-	return (result * signal);
+	return (NULL);
 }
 
-int	argument_is_number(int ac, char **av)
+int	init_philos(t_data *data)
 {
-	int	i;
-	int	j;
+	int	i;	
 
+	data->fork = malloc(sizeof(t_fork) * data->n_philos);
+	if (!data->fork)
+		return (error_philo("Error: Fork's malloc error!\n"));
+	data->philo = malloc(sizeof(t_philo) * data->n_philos);
+	if (!data->philo)
+		return (error_philo("Error: Philo's malloc error!\n"));
 	i = 1;
-	while (i < ac)
+	while (i <= data->n_philos)
 	{
-		j = 0;
-		while (av[i][j])
+		data->philo[i - 1].id = i;
+		data->fork[i - 1].id = i;
+		pthread_mutex_init(&data->fork[i - 1].mtx, NULL);
+		if (i == data->n_philos)
 		{
-			if(av[i][0] == '-' && j == 0)
-				j++;
-			if (av[i][j] > '9' || av[i][j] < '0')
-				return (0);
-			j++;
+			data->philo[i - 1].right_fork = &data->fork[i - 1];
+			data->philo[i - 1].left_fork = &data->fork[0];
+		}
+		else
+		{
+			data->philo[i - 1].right_fork = &data->fork[i - 1];
+			data->philo[i - 1].left_fork = &data->fork[i];
 		}
 		i++;
 	}
-	return (1);
-}
-
-int	error_philo(char *msg)
-{
-	printf("%s", msg);
-	return (0);
-}
-
-int	check_overflow_and_signal(t_data *data)
-{
-	if (data->n_philos < 1)
-		return (error_philo("Error: Must have at least 1 philosopher\n"));
-	if (data->time_to_die < 0 || data->time_to_eat < 0 || data->time_to_sleep < 0)
-		return (error_philo("Error: Only positive numbers as parameters!\n"));
-	if (data->n_philos > INT_MAX || data->repeat > INT_MAX || data->time_to_eat >INT_MAX
-		|| data->time_to_sleep > INT_MAX || data->time_to_die > INT_MAX)
-		return (error_philo("Error: INT_MAX is 2147483647!\n"));
-	return (1);
-}
-
-int	init_data(char **av, t_data *data)
-{
-	data->n_philos = ft_atoi(av[1]);
-	data->time_to_die = ft_atoi(av[2]);
-	data->time_to_eat = ft_atoi(av[3]);
-	data->time_to_sleep = ft_atoi(av[4]);
-	if (av[5] && ft_atoi(av[5]) >= 0)
-		data->repeat = ft_atoi(av[5]);
-	else if (!av[5])
-		data->repeat = -1;
-	else
-		return (error_philo("Error: Only positive numbers as parameters!\n"));
-	if (!check_overflow_and_signal(data))
-		return (0);
-	return (1);
-}
-
-int	init_input(int ac, char **av, t_data *data)
-{
-	if (ac != 5 && ac != 6)
-		return (error_philo("Error: Invalid number of arguments!\n"));
-	if (!argument_is_number(ac, av))
-		return (error_philo("Error: Arguments must be numbers!\n"));
-	if (!init_data(av, data))
-		return (0);
+	i = 1;
+	while (i <= data->n_philos)
+	{
+		pthread_create(&data->philo[i - 1].thread, NULL, &test, (void *)&data->philo[i - 1]);
+		i++;
+	}
+	i = 1;
+	while (i <= data->n_philos)
+	{
+		pthread_join(data->philo[i - 1].thread, NULL);
+		i++;
+	}
 	return (1);
 }
 
 int	main(int ac, char **av)
 {
-	t_data	data;
+	t_data			data;
 
 	if (!init_input(ac, av, &data))
 		return (0);
-	printf("Philos: %li\n", data.n_philos);
+	init_philos(&data);
+// PRINT ARGS
+/* 	printf("Philos: %li\n", data.n_philos);
 	printf("Time to die: %li\n", data.time_to_die);
 	printf("Time to eat: %li\n", data.time_to_eat);
 	printf("Time to sleep: %li\n", data.time_to_sleep);
-	printf("Repeat: %li\n", data.repeat);
+	printf("Repeat: %li\n", data.repeat); */
+
+// PRINT PHILOS
+/* 	int	i = 1;
+	while (i <= data.n_philos)
+	{
+		printf("Philo %i id: %i, Right Fork id: %i, Left Fork id: %i\n", i, data.philo[i - 1].id, data.philo[i - 1].right_fork->id, data.philo[i - 1].left_fork->id);
+		i++;
+	} */
+	free(data.philo);
+	free(data.fork);
 }

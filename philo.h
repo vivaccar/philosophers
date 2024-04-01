@@ -15,22 +15,23 @@ typedef struct s_fork
 
 typedef struct s_philo
 {
-	int				id;
-	pthread_t		thread;
-	t_fork			*left_fork;
-	t_fork			*right_fork;
+	int					id;
+	pthread_mutex_t		*left_fork;
+	pthread_mutex_t		*right_fork;
+	//pthread_t			*td;
 }					t_philo;
 
 
 typedef struct s_data
 {
-	long		n_philos;
-	long		time_to_die;
-	long		time_to_sleep;
-	long		time_to_eat;
-	long		repeat;
-	t_philo		*philo;
-	t_fork		*fork;
+	long			n_philos;
+	long			time_to_die;
+	long			time_to_sleep;
+	long			time_to_eat;
+	long			repeat;
+	t_philo			*philo;
+	pthread_mutex_t	*forks;
+	pthread_t		*threads;
 }				t_data;
 
 //INPUT

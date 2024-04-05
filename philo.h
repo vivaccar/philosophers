@@ -28,6 +28,7 @@ typedef struct s_data
 	long			time_to_sleep;
 	long			time_to_eat;
 	long			repeat;
+	int				live;
 	size_t			start_time;
 	t_philo			*philo;
 	pthread_mutex_t	*forks;

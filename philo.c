@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:10:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/05 11:54:04 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/05 13:45:26 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,14 +38,14 @@ void	*test(void *data)
 
 	philo = (t_philo *)data;
 	i = 0;
-
-	printf("Time to eat: %li\n", philo->data->time_to_eat);
-	printf("Time to sleep: %li\n", philo->data->time_to_sleep);
 	philo->last_meal = philo->data->start_time;
-	while (i < philo->data->repeat)
+	while (i < philo->data->repeat && philo->data->live == 1)
 	{
 		if (ft_get_time() - philo->last_meal > (unsigned long) philo->data->time_to_die)
+		{
+			philo->data->live = 0;
 			return (printf("Philo %i dead.\n", philo->id), NULL);
+		}
 		pthread_mutex_lock(philo->right_fork);
 		pthread_mutex_lock(philo->left_fork);
 		printf("%zu: Philo %i has taken the fork.\n", ft_get_time() - philo->data->start_time, philo->id);
@@ -105,7 +105,6 @@ int	start_dinner(t_data *data)
 
 	i = 0;
 	data->start_time = ft_get_time();
-	printf("Simulation start time: %zu\n", data->start_time);
 	while (i < data->n_philos)
 	{
 		if (pthread_create(&data->threads[i], NULL, &test, &data->philo[i]))
@@ -133,11 +132,11 @@ int	main(int ac, char **av)
 	if (!start_dinner(&data))
 		return (0);
 // PRINT ARGS
-	printf("Philos: %li\n", data.n_philos);
+/* 	printf("Philos: %li\n", data.n_philos);
 	printf("Time to die: %li\n", data.time_to_die);
 	printf("Time to eat: %li\n", data.time_to_eat);
 	printf("Time to sleep: %li\n", data.time_to_sleep);
-	printf("Repeat: %li\n", data.repeat);
+	printf("Repeat: %li\n", data.repeat); */
 
 // PRINT PHILOS
 /* 	int	i = 1;

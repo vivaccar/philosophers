@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:21 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/03/30 13:21:21 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/05 13:25:42 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ int	init_data(char **av, t_data *data)
 	data->time_to_die = ft_atoi(av[2]);
 	data->time_to_eat = ft_atoi(av[3]);
 	data->time_to_sleep = ft_atoi(av[4]);
+	data->live = 1;
 	if (av[5] && ft_atoi(av[5]) >= 0)
 		data->repeat = ft_atoi(av[5]);
 	else if (!av[5])

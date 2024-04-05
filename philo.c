@@ -6,11 +6,30 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:10:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/01 12:08:15 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/05 11:54:04 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+size_t	ft_get_time()
+{
+	struct timeval	time;
+
+	if (gettimeofday(&time, NULL ) == -1 ) 
+		write( 2 , "Error: Gettimeof day.\n" , 22 );
+	return (time.tv_sec * 1000 + time.tv_usec / 1000);
+}
+
+int ft_usleep(size_t miliseconds)
+ { 
+	size_t 	start;
+
+	start = ft_get_time();
+	while ((ft_get_time() - start) < miliseconds)
+		usleep (500);
+	return (0);
+}
 
 void	*test(void *data)
 {
@@ -20,20 +39,27 @@ void	*test(void *data)
 	philo = (t_philo *)data;
 	i = 0;
 
-	while (i < 3)
+	printf("Time to eat: %li\n", philo->data->time_to_eat);
+	printf("Time to sleep: %li\n", philo->data->time_to_sleep);
+	philo->last_meal = philo->data->start_time;
+	while (i < philo->data->repeat)
 	{
+		if (ft_get_time() - philo->last_meal > (unsigned long) philo->data->time_to_die)
+			return (printf("Philo %i dead.\n", philo->id), NULL);
 		pthread_mutex_lock(philo->right_fork);
 		pthread_mutex_lock(philo->left_fork);
-		printf("Philo %i took the fork.\n", philo->id);
-		printf("Philo %i took the fork.\n", philo->id);
-		printf("Philo %i is eating..\n", philo->id);
-		usleep(200 * 1000);
-		printf("Philo %i drop the fork.\n", philo->id);
-		printf("Philo %i drop the fork.\n", philo->id);
+		printf("%zu: Philo %i has taken the fork.\n", ft_get_time() - philo->data->start_time, philo->id);
+		printf("%zu: Philo %i has taken the fork.\n", ft_get_time() - philo->data->start_time, philo->id);
+		printf("%zu: Philo %i is eating..\n", ft_get_time() - philo->data->start_time, philo->id);
+		ft_usleep(philo->data->time_to_eat);
+		philo->last_meal = ft_get_time();
+		printf("%zu: Philo %i drop the fork.\n", ft_get_time() - philo->data->start_time, philo->id);
+		printf("%zu: Philo %i drop the fork.\n", ft_get_time() - philo->data->start_time, philo->id);
 		pthread_mutex_unlock(philo->right_fork);
 		pthread_mutex_unlock(philo->left_fork);
-		printf("Philo %i is thinking...\n", philo->id);
-		usleep(200 * 1000);
+		printf("%zu: Philo %i is sleeping...\n", ft_get_time() - philo->data->start_time, philo->id);
+		ft_usleep(philo->data->time_to_sleep);
+		printf("%zu: Philo %i is thinking.\n", ft_get_time() - philo->data->start_time, philo->id);
 		i++;
 	}
 	return (NULL);
@@ -47,6 +73,7 @@ void	deliver_forks(t_data *data)
 	while (i <= data->n_philos)
 	{
 		data->philo[i - 1].id = i;
+		data->philo[i - 1].data = data;
 		pthread_mutex_init(&data->forks[i - 1], NULL);
 		data->philo[i - 1].right_fork = &data->forks[i - 1];
 		if (data->n_philos == i)
@@ -59,8 +86,6 @@ void	deliver_forks(t_data *data)
 
 int	init_philos(t_data *data)
 {
-	int	i;	
-
 	data->forks = malloc(sizeof(pthread_mutex_t) * data->n_philos);
 	if (!data->forks)
 		return (error_philo("Error: Fork's malloc error!\n"));
@@ -71,16 +96,27 @@ int	init_philos(t_data *data)
 	if (!data->philo)
 		return (error_philo("Error: Philo's malloc error!\n"));
 	deliver_forks(data);
-	i = 1;
-	while (i <= data->n_philos)
+	return (1);
+}
+
+int	start_dinner(t_data *data)
+{
+	int	i;
+
+	i = 0;
+	data->start_time = ft_get_time();
+	printf("Simulation start time: %zu\n", data->start_time);
+	while (i < data->n_philos)
 	{
-		pthread_create(&data->threads[i - 1], NULL, &test, (void *)&data->philo[i - 1]);
+		if (pthread_create(&data->threads[i], NULL, &test, &data->philo[i]))
+			return (error_philo("Error: Thread Create.\n"));
 		i++;
 	}
-	i = 1;
-	while (i <= data->n_philos)
+	i = 0;
+	while (i < data->n_philos)
 	{
-		pthread_join(data->threads[i - 1], NULL);
+		if (pthread_join(data->threads[i], NULL))
+			return (error_philo("Error: Thread Join.\n"));
 		i++;
 	}
 	return (1);
@@ -94,12 +130,14 @@ int	main(int ac, char **av)
 		return (0);
 	if (!init_philos(&data))
 		return (0);
+	if (!start_dinner(&data))
+		return (0);
 // PRINT ARGS
-/* 	printf("Philos: %li\n", data.n_philos);
+	printf("Philos: %li\n", data.n_philos);
 	printf("Time to die: %li\n", data.time_to_die);
 	printf("Time to eat: %li\n", data.time_to_eat);
 	printf("Time to sleep: %li\n", data.time_to_sleep);
-	printf("Repeat: %li\n", data.repeat); */
+	printf("Repeat: %li\n", data.repeat);
 
 // PRINT PHILOS
 /* 	int	i = 1;

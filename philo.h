@@ -6,18 +6,17 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <limits.h>
+# include <sys/time.h>
 
-typedef struct s_fork
-{
-	int				id;
-	pthread_mutex_t	mtx;
-}				t_fork;
+struct		s_data;
 
 typedef struct s_philo
 {
 	int					id;
 	pthread_mutex_t		*left_fork;
 	pthread_mutex_t		*right_fork;
+	struct s_data		*data;
+	size_t				last_meal;
 	//pthread_t			*td;
 }					t_philo;
 
@@ -29,6 +28,7 @@ typedef struct s_data
 	long			time_to_sleep;
 	long			time_to_eat;
 	long			repeat;
+	size_t			start_time;
 	t_philo			*philo;
 	pthread_mutex_t	*forks;
 	pthread_t		*threads;

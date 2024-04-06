@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:10:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/05 13:45:26 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/06 15:38:08 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,35 +31,35 @@ int ft_usleep(size_t miliseconds)
 	return (0);
 }
 
-void	*test(void *data)
+void	*eat(void *data)
 {
 	t_philo	*philo;
 	int		i;
 
 	philo = (t_philo *)data;
 	i = 0;
-	philo->last_meal = philo->data->start_time;
-	while (i < philo->data->repeat && philo->data->live == 1)
+	philo->dead_time = philo->data->start_time + (unsigned long) philo->data->time_to_die;
+	while (i != philo->data->repeat && philo->data->live)
 	{
-		if (ft_get_time() - philo->last_meal > (unsigned long) philo->data->time_to_die)
-		{
-			philo->data->live = 0;
-			return (printf("Philo %i dead.\n", philo->id), NULL);
-		}
 		pthread_mutex_lock(philo->right_fork);
 		pthread_mutex_lock(philo->left_fork);
-		printf("%zu: Philo %i has taken the fork.\n", ft_get_time() - philo->data->start_time, philo->id);
-		printf("%zu: Philo %i has taken the fork.\n", ft_get_time() - philo->data->start_time, philo->id);
-		printf("%zu: Philo %i is eating..\n", ft_get_time() - philo->data->start_time, philo->id);
+		if (ft_get_time() > (unsigned long) philo->dead_time)
+		{
+			philo->data->live = 0;
+			return (printf("%zu: %i died\n", ft_get_time() - philo->data->start_time, philo->id), NULL);
+		}
+		printf("%zu: %i has taken a fork\n", ft_get_time() - philo->data->start_time, philo->id);
+		printf("%zu: %i has taken a fork\n", ft_get_time() - philo->data->start_time, philo->id);
+		printf("%zu: %i is eating\n", ft_get_time() - philo->data->start_time, philo->id);
+		philo->dead_time = ft_get_time() + philo->data->time_to_die;
 		ft_usleep(philo->data->time_to_eat);
-		philo->last_meal = ft_get_time();
-		printf("%zu: Philo %i drop the fork.\n", ft_get_time() - philo->data->start_time, philo->id);
-		printf("%zu: Philo %i drop the fork.\n", ft_get_time() - philo->data->start_time, philo->id);
+		printf("%zu: %i drop the fork\n", ft_get_time() - philo->data->start_time, philo->id);
+		printf("%zu: %i drop the fork\n", ft_get_time() - philo->data->start_time, philo->id);
 		pthread_mutex_unlock(philo->right_fork);
 		pthread_mutex_unlock(philo->left_fork);
-		printf("%zu: Philo %i is sleeping...\n", ft_get_time() - philo->data->start_time, philo->id);
+		printf("%zu: %i is sleeping\n", ft_get_time() - philo->data->start_time, philo->id);
 		ft_usleep(philo->data->time_to_sleep);
-		printf("%zu: Philo %i is thinking.\n", ft_get_time() - philo->data->start_time, philo->id);
+		printf("%zu: %i is thinking\n", ft_get_time() - philo->data->start_time, philo->id);
 		i++;
 	}
 	return (NULL);
@@ -107,7 +107,7 @@ int	start_dinner(t_data *data)
 	data->start_time = ft_get_time();
 	while (i < data->n_philos)
 	{
-		if (pthread_create(&data->threads[i], NULL, &test, &data->philo[i]))
+		if (pthread_create(&data->threads[i], NULL, &eat, &data->philo[i]))
 			return (error_philo("Error: Thread Create.\n"));
 		i++;
 	}

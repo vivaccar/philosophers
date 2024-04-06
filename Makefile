@@ -6,7 +6,7 @@ CC		=	cc
 
 NAME	=	philo
 
-CFLAGS  = 	-Wall -Wextra -Werror -g
+CFLAGS  = 	-Wall -Wextra -Werror -g 
 
 all: $(NAME)
 
@@ -20,3 +20,5 @@ fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
+
+# -fsanitize=address

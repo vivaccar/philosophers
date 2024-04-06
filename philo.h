@@ -16,7 +16,7 @@ typedef struct s_philo
 	pthread_mutex_t		*left_fork;
 	pthread_mutex_t		*right_fork;
 	struct s_data		*data;
-	size_t				last_meal;
+	size_t				dead_time;
 	//pthread_t			*td;
 }					t_philo;
 

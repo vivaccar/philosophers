@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:10:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/06 15:38:08 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/08 11:27:11 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,36 +31,95 @@ int ft_usleep(size_t miliseconds)
 	return (0);
 }
 
+
+/* void	*checker(void *data)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *)data;
+	while (42)
+	{
+		if (philo->dead_time < ft_get_time())
+		{
+			printf("%zu: %i died\n", ft_get_time() - philo->data->start_time, philo->id);
+			philo->data->live = 0;
+			break ;
+		}
+	}
+	return (NULL);
+} */
+
+
+
+
+void	print_status(char *str, t_philo *philo)
+{
+		pthread_mutex_lock(&philo->data->status);
+		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
+		pthread_mutex_unlock(&philo->data->status);
+}
+
+void	hold_forks(t_philo *philo)
+{
+	pthread_mutex_lock(philo->right_fork);
+	print_status(FORKS, philo);
+	pthread_mutex_lock(philo->left_fork);
+	print_status(FORKS, philo);
+	print_status(EAT, philo);
+}
+
+void	drop_forks(t_philo *philo)
+{
+	pthread_mutex_unlock(philo->right_fork);
+	pthread_mutex_unlock(philo->left_fork);
+}
+
+void	*supervisor(void *data)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *)data;
+	while (philo->data->live)
+	{
+		if (philo->dead_time < ft_get_time() && !philo->is_eating)
+		{
+			philo->data->live = 0;
+			print_status("died", philo);
+		}
+	}
+	return (NULL);
+}
+
 void	*eat(void *data)
 {
 	t_philo	*philo;
 	int		i;
-
+	
 	philo = (t_philo *)data;
 	i = 0;
-	philo->dead_time = philo->data->start_time + (unsigned long) philo->data->time_to_die;
-	while (i != philo->data->repeat && philo->data->live)
+	if (pthread_create(&philo->td, NULL, &supervisor, philo))
 	{
-		pthread_mutex_lock(philo->right_fork);
-		pthread_mutex_lock(philo->left_fork);
-		if (ft_get_time() > (unsigned long) philo->dead_time)
-		{
-			philo->data->live = 0;
-			return (printf("%zu: %i died\n", ft_get_time() - philo->data->start_time, philo->id), NULL);
-		}
-		printf("%zu: %i has taken a fork\n", ft_get_time() - philo->data->start_time, philo->id);
-		printf("%zu: %i has taken a fork\n", ft_get_time() - philo->data->start_time, philo->id);
-		printf("%zu: %i is eating\n", ft_get_time() - philo->data->start_time, philo->id);
+		error_philo("Error: Thread supervisor!\n");
+		return (NULL);
+	}
+	philo->dead_time = ft_get_time() + philo->data->time_to_die;
+	while (philo->data->live)
+	{
+		hold_forks(philo);
 		philo->dead_time = ft_get_time() + philo->data->time_to_die;
+		philo->is_eating = 1;
 		ft_usleep(philo->data->time_to_eat);
-		printf("%zu: %i drop the fork\n", ft_get_time() - philo->data->start_time, philo->id);
-		printf("%zu: %i drop the fork\n", ft_get_time() - philo->data->start_time, philo->id);
-		pthread_mutex_unlock(philo->right_fork);
-		pthread_mutex_unlock(philo->left_fork);
-		printf("%zu: %i is sleeping\n", ft_get_time() - philo->data->start_time, philo->id);
+		philo->is_eating = 0;
+		drop_forks(philo);
+		print_status(SLEEP, philo);
 		ft_usleep(philo->data->time_to_sleep);
-		printf("%zu: %i is thinking\n", ft_get_time() - philo->data->start_time, philo->id);
+		print_status(THINK, philo);
 		i++;
+	}
+	if (pthread_join(philo->td, NULL))
+	{
+		error_philo("Error: Thread supervisor!\n");
+		return (NULL);
 	}
 	return (NULL);
 }
@@ -72,6 +131,7 @@ void	deliver_forks(t_data *data)
 	i = 1;
 	while (i <= data->n_philos)
 	{
+		data->philo[i - 1].is_eating = 0;
 		data->philo[i - 1].id = i;
 		data->philo[i - 1].data = data;
 		pthread_mutex_init(&data->forks[i - 1], NULL);
@@ -82,6 +142,7 @@ void	deliver_forks(t_data *data)
 			data->philo[i - 1].left_fork = &data->forks[i];
 		i++;
 	}
+	pthread_mutex_init(&data->status, NULL);
 }
 
 int	init_philos(t_data *data)

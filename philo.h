@@ -8,6 +8,11 @@
 # include <limits.h>
 # include <sys/time.h>
 
+# define EAT "is eating"
+# define FORKS "has taken a fork"
+# define SLEEP "is sleeping"
+# define THINK "is thinking"
+
 struct		s_data;
 
 typedef struct s_philo
@@ -17,7 +22,8 @@ typedef struct s_philo
 	pthread_mutex_t		*right_fork;
 	struct s_data		*data;
 	size_t				dead_time;
-	//pthread_t			*td;
+	pthread_t			td;
+	int					is_eating;
 }					t_philo;
 
 
@@ -33,6 +39,7 @@ typedef struct s_data
 	t_philo			*philo;
 	pthread_mutex_t	*forks;
 	pthread_t		*threads;
+	pthread_mutex_t	status;
 }				t_data;
 
 //INPUT

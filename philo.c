@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 16:10:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/08 11:27:11 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/08 13:48:42 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,40 +31,38 @@ int ft_usleep(size_t miliseconds)
 	return (0);
 }
 
-
-/* void	*checker(void *data)
+int	ft_strncmp(const char *s1, const char *s2, size_t n)
 {
-	t_philo	*philo;
+	size_t	i;
 
-	philo = (t_philo *)data;
-	while (42)
+	i = 0;
+	while (((s1[i]) || (s2[i])) && (i < n))
 	{
-		if (philo->dead_time < ft_get_time())
-		{
-			printf("%zu: %i died\n", ft_get_time() - philo->data->start_time, philo->id);
-			philo->data->live = 0;
-			break ;
-		}
+		if (s1[i] != s2[i])
+			return ((unsigned char)s1[i] - (unsigned char)s2[i]);
+		i++;
 	}
-	return (NULL);
-} */
-
-
-
+	return (0);
+}
 
 void	print_status(char *str, t_philo *philo)
 {
-		pthread_mutex_lock(&philo->data->status);
+	pthread_mutex_lock(&philo->data->status);
+	if (!(ft_strncmp(str, "died", 4)))	
 		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
-		pthread_mutex_unlock(&philo->data->status);
+	else if (philo->data->live && ft_strncmp(str, "died", 4))
+		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
+	pthread_mutex_unlock(&philo->data->status);
 }
 
 void	hold_forks(t_philo *philo)
 {
+	// pthread_mutex_lock(&philo->data->hold);
 	pthread_mutex_lock(philo->right_fork);
 	print_status(FORKS, philo);
 	pthread_mutex_lock(philo->left_fork);
 	print_status(FORKS, philo);
+	// pthread_mutex_unlock(&philo->data->hold);
 	print_status(EAT, philo);
 }
 
@@ -79,7 +77,7 @@ void	*supervisor(void *data)
 	t_philo	*philo;
 
 	philo = (t_philo *)data;
-	while (philo->data->live)
+	while (philo->data->live && philo->data->repeat != philo->meals)
 	{
 		if (philo->dead_time < ft_get_time() && !philo->is_eating)
 		{
@@ -97,6 +95,8 @@ void	*eat(void *data)
 	
 	philo = (t_philo *)data;
 	i = 0;
+	if (philo->id % 2 == 0)
+		ft_usleep(1);
 	if (pthread_create(&philo->td, NULL, &supervisor, philo))
 	{
 		error_philo("Error: Thread supervisor!\n");
@@ -111,10 +111,12 @@ void	*eat(void *data)
 		ft_usleep(philo->data->time_to_eat);
 		philo->is_eating = 0;
 		drop_forks(philo);
+		philo->meals++;
+		if (philo->meals == philo->data->repeat)
+			break ;
 		print_status(SLEEP, philo);
 		ft_usleep(philo->data->time_to_sleep);
 		print_status(THINK, philo);
-		i++;
 	}
 	if (pthread_join(philo->td, NULL))
 	{
@@ -134,6 +136,7 @@ void	deliver_forks(t_data *data)
 		data->philo[i - 1].is_eating = 0;
 		data->philo[i - 1].id = i;
 		data->philo[i - 1].data = data;
+		data->philo[i - 1].meals = 0;
 		pthread_mutex_init(&data->forks[i - 1], NULL);
 		data->philo[i - 1].right_fork = &data->forks[i - 1];
 		if (data->n_philos == i)

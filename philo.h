@@ -24,6 +24,7 @@ typedef struct s_philo
 	size_t				dead_time;
 	pthread_t			td;
 	int					is_eating;
+	int					meals;
 }					t_philo;
 
 
@@ -40,6 +41,7 @@ typedef struct s_data
 	pthread_mutex_t	*forks;
 	pthread_t		*threads;
 	pthread_mutex_t	status;
+	pthread_mutex_t	hold;
 }				t_data;
 
 //INPUT

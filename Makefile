@@ -1,4 +1,4 @@
-SRCS	=	philo.c utils.c input.c
+SRCS	=	philo.c utils.c input.c threads.c init.c
 
 OBJS	=	$(SRCS:.c=.o)
 
@@ -6,7 +6,7 @@ CC		=	cc
 
 NAME	=	philo
 
-CFLAGS  = 	-Wall -Wextra -Werror -g 
+CFLAGS  = 	-Wall -Wextra -Werror -g
 
 all: $(NAME)
 
@@ -21,4 +21,4 @@ fclean: clean
 
 re: fclean all
 
-# -fsanitize=address
+# -fsanitize=thread

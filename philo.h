@@ -50,8 +50,24 @@ int		init_data(char **av, t_data *data);
 int		check_overflow_and_signal(t_data *data);
 int		argument_is_number(int ac, char **av);
 
+//INIT
+int		init_philos(t_data *data);
+void	deliver_forks(t_data *data);
+
 //UTILS
 long	ft_atoi(const char *str);
 int		error_philo(char *msg);
+size_t	ft_get_time();
+int 	ft_usleep(size_t miliseconds);
+int		ft_strncmp(const char *s1, const char *s2, size_t n);
+
+
+//THREAD
+void	print_status(char *str, t_philo *philo);
+void	*supervisor(void *data);
+void	eating(t_philo *philo);
+void	sleep_and_think(t_philo *philo);
+void	*routine(void *data);
+int		start_dinner(t_data *data);
 
 #endif

@@ -12,6 +12,13 @@
 # define FORKS "has taken a fork"
 # define SLEEP "is sleeping"
 # define THINK "is thinking"
+# define DIED "died"
+# define E_SLEEP "\U0001F4A4"
+# define E_DIED "\U00002620"
+# define E_THINKING "\U0001F914"
+# define E_FORKS "\U0001F374"
+# define E_EAT "\U0001F60B"
+
 
 struct		s_data;
 
@@ -61,10 +68,11 @@ int		error_philo(char *msg);
 size_t	ft_get_time();
 int 	ft_usleep(size_t miliseconds);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
+void	destroy_data(t_data *data);
 
 
 //THREAD
-void	print_status(char *str, t_philo *philo);
+void	print_status(char *str, t_philo *philo, char *e);
 void	*supervisor(void *data);
 void	eating(t_philo *philo);
 void	sleep_and_think(t_philo *philo);

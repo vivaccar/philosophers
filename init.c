@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:45:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/09 14:45:38 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/10 13:40:59 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ void	deliver_forks(t_data *data)
 		data->philo[i - 1].data = data;
 		data->philo[i - 1].meals = 0;
 		pthread_mutex_init(&data->forks[i - 1], NULL);
+		pthread_mutex_init(&data->philo[i - 1].p_mtx, NULL);
 		data->philo[i - 1].right_fork = &data->forks[i - 1];
 		if (data->n_philos == i)
 			data->philo[i - 1].left_fork = &data->forks[0];
@@ -32,6 +33,7 @@ void	deliver_forks(t_data *data)
 		i++;
 	}
 	pthread_mutex_init(&data->status, NULL);
+	pthread_mutex_init(&data->data_locker, NULL);
 }
 
 int	init_philos(t_data *data)

@@ -20,13 +20,13 @@ typedef struct s_philo
 	int					id;
 	pthread_mutex_t		*left_fork;
 	pthread_mutex_t		*right_fork;
+	pthread_mutex_t		p_mtx;
 	struct s_data		*data;
 	size_t				dead_time;
 	pthread_t			td;
 	int					is_eating;
 	int					meals;
 }					t_philo;
-
 
 typedef struct s_data
 {
@@ -41,7 +41,7 @@ typedef struct s_data
 	pthread_mutex_t	*forks;
 	pthread_t		*threads;
 	pthread_mutex_t	status;
-	pthread_mutex_t	hold;
+	pthread_mutex_t	data_locker;
 }				t_data;
 
 //INPUT

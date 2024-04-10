@@ -26,6 +26,7 @@ typedef struct s_philo
 	pthread_t			td;
 	int					is_eating;
 	int					meals;
+	int					full;
 }					t_philo;
 
 typedef struct s_data

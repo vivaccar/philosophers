@@ -3,25 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/10 20:00:34 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/10 22:38:25 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	print_status(char *str, t_philo *philo)
+void	print_status(char *str, t_philo *philo, char *e)
 {
 	pthread_mutex_lock(&philo->data->status);
 	if (!(ft_strncmp(str, "died", 4)))	
 	{
-		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
+		printf("%zu %i %s %s\n", ft_get_time() - philo->data->start_time, philo->id, str, E_DIED);
 		philo->data->live = 0;
 	}
 	else if (philo->data->live && ft_strncmp(str, "died", 4))
-		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
+		printf("%zu %i %s %s\n", ft_get_time() - philo->data->start_time, philo->id, str, e);
 	pthread_mutex_unlock(&philo->data->status);
 }
 
@@ -34,7 +34,7 @@ void	*check_if_died(void *data)
 	{
 		pthread_mutex_lock(&philo->p_mtx);
 		if ((ft_get_time() > philo->dead_time) && (philo->is_eating == 0))
-			print_status("died", philo);
+			print_status("died", philo, E_SLEEP);
 		pthread_mutex_unlock(&philo->p_mtx);
 	}
 	return (NULL);
@@ -43,11 +43,11 @@ void	*check_if_died(void *data)
 void	hold_forks(pthread_mutex_t *first, pthread_mutex_t *second, t_philo *philo)
 {
 	pthread_mutex_lock(first);
-	print_status(FORKS, philo);
+	print_status(FORKS, philo, E_FORKS);
 	pthread_mutex_lock(second);
-	print_status(FORKS, philo);
+	print_status(FORKS, philo, E_FORKS);
 	pthread_mutex_lock(&philo->p_mtx);
-	print_status(EAT, philo);
+	print_status(EAT, philo, E_EAT);
 	philo->dead_time = ft_get_time() + philo->data->time_to_die;
 	philo->is_eating = 1;
 	ft_usleep(philo->data->time_to_eat);
@@ -56,9 +56,9 @@ void	hold_forks(pthread_mutex_t *first, pthread_mutex_t *second, t_philo *philo)
     pthread_mutex_unlock(second);
 	philo->meals++;
 	pthread_mutex_unlock(&philo->p_mtx);
-	print_status(SLEEP, philo);
+	print_status(SLEEP, philo, E_SLEEP);
 	ft_usleep(philo->data->time_to_sleep);
-	print_status(THINK, philo);
+	print_status(THINK, philo, E_THINKING);
 }
 
 void	try_to_eat(t_philo *philo)

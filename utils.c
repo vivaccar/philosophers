@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/09 14:46:26 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/10 21:56:12 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,4 +74,25 @@ int	error_philo(char *msg)
 {
 	printf("%s", msg);
 	return (0);
+}
+
+void	destroy_data(t_data *data)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->n_philos)
+	{
+		pthread_mutex_destroy(&data->forks[i]);
+		pthread_mutex_destroy(&data->philo[i].p_mtx);
+		i++;
+	}
+	pthread_mutex_destroy(&data->data_locker);
+	pthread_mutex_destroy(&data->status);
+	if (data->philo)
+		free(data->philo);
+	if (data->threads)
+		free(data->threads);
+	if (data->forks)
+		free(data->forks);
 }

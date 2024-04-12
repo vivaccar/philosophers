@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:45:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/11 15:37:18 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/12 13:43:13 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,13 @@ void	deliver_forks(t_data *data)
 	i = 1;
 	while (i <= data->n_philos)
 	{
-		data->philo[i - 1].is_eating = 0;
 		data->philo[i - 1].id = i;
 		data->philo[i - 1].data = data;
 		data->philo[i - 1].meals = 0;
 		data->philo[i - 1].full = 0;
 		pthread_mutex_init(&data->forks[i - 1], NULL);
 		pthread_mutex_init(&data->philo[i - 1].p_mtx, NULL);
+		pthread_mutex_init(&data->philo[i - 1].full_mtx, NULL);
 		data->philo[i - 1].right_fork = &data->forks[i - 1];
 		if (data->n_philos == i)
 			data->philo[i - 1].left_fork = &data->forks[0];
@@ -33,7 +33,6 @@ void	deliver_forks(t_data *data)
 			data->philo[i - 1].left_fork = &data->forks[i];
 		i++;
 	}
-	pthread_mutex_init(&data->full_mtx, NULL);
 	pthread_mutex_init(&data->status, NULL);
 	pthread_mutex_init(&data->data_locker, NULL);
 	pthread_mutex_init(&data->died_mtx, NULL);

@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/12 10:36:58 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/12 15:28:15 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,16 +83,16 @@ void	destroy_data(t_data *data)
 	i = 0;
 	while (i < data->n_philos)
 	{
-/* 		if (data->n_philos == 1)
-			pthread_mutex_unlock(&data->forks[i]); */
-		pthread_mutex_destroy(&data->forks[i]);
+		if (data->n_philos > 1)
+			pthread_mutex_destroy(&data->forks[i]);
 		pthread_mutex_destroy(&data->philo[i].p_mtx);
+		pthread_mutex_destroy(&data->philo[i].full_mtx);
 		i++;
 	}
 	pthread_mutex_destroy(&data->data_locker);
 	pthread_mutex_destroy(&data->status);
 	pthread_mutex_destroy(&data->died_mtx);
-	pthread_mutex_destroy(&data->full_mtx);
+	//pthread_mutex_destroy(&data->create_mtx);
 	if (data->philo)
 		free(data->philo);
 	if (data->threads)

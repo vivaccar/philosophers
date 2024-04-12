@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
+/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/10 22:38:25 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/12 10:49:45 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,9 @@ void	print_status(char *str, t_philo *philo, char *e)
 	if (!(ft_strncmp(str, "died", 4)))	
 	{
 		printf("%zu %i %s %s\n", ft_get_time() - philo->data->start_time, philo->id, str, E_DIED);
+		pthread_mutex_lock(&philo->data->died_mtx);
 		philo->data->live = 0;
+		pthread_mutex_unlock(&philo->data->died_mtx);
 	}
 	else if (philo->data->live && ft_strncmp(str, "died", 4))
 		printf("%zu %i %s %s\n", ft_get_time() - philo->data->start_time, philo->id, str, e);
@@ -30,11 +32,25 @@ void	*check_if_died(void *data)
 	t_philo	*philo;
 
 	philo = (t_philo *)data;
-	while (philo->data->live && !philo->full)
+	while (1)
 	{
+		pthread_mutex_lock(&philo->data->full_mtx);
+		if (philo->full)
+		{
+			pthread_mutex_unlock(&philo->data->full_mtx);
+			break ;
+		}
+		pthread_mutex_unlock(&philo->data->full_mtx);
+		pthread_mutex_lock(&philo->data->died_mtx);
+		if (!philo->data->live)
+		{
+			pthread_mutex_unlock(&philo->data->died_mtx);
+			break ;
+		}
+		pthread_mutex_unlock(&philo->data->died_mtx);
 		pthread_mutex_lock(&philo->p_mtx);
 		if ((ft_get_time() > philo->dead_time) && (philo->is_eating == 0))
-			print_status("died", philo, E_SLEEP);
+				print_status("died", philo, E_DIED);
 		pthread_mutex_unlock(&philo->p_mtx);
 	}
 	return (NULL);
@@ -46,16 +62,20 @@ void	hold_forks(pthread_mutex_t *first, pthread_mutex_t *second, t_philo *philo)
 	print_status(FORKS, philo, E_FORKS);
 	pthread_mutex_lock(second);
 	print_status(FORKS, philo, E_FORKS);
-	pthread_mutex_lock(&philo->p_mtx);
 	print_status(EAT, philo, E_EAT);
+	pthread_mutex_lock(&philo->p_mtx);
 	philo->dead_time = ft_get_time() + philo->data->time_to_die;
 	philo->is_eating = 1;
 	ft_usleep(philo->data->time_to_eat);
 	philo->is_eating = 0;
+	pthread_mutex_unlock(&philo->p_mtx);
 	pthread_mutex_unlock(first);
     pthread_mutex_unlock(second);
+	pthread_mutex_lock(&philo->data->full_mtx);
 	philo->meals++;
-	pthread_mutex_unlock(&philo->p_mtx);
+	if (philo->meals == philo->data->repeat)
+		philo->full = 1;
+	pthread_mutex_unlock(&philo->data->full_mtx);
 	print_status(SLEEP, philo, E_SLEEP);
 	ft_usleep(philo->data->time_to_sleep);
 	print_status(THINK, philo, E_THINKING);
@@ -71,7 +91,7 @@ void	try_to_eat(t_philo *philo)
         first_fork = philo->left_fork;
         second_fork = philo->right_fork;
     }
-	else 
+	else
 	{
         first_fork = philo->right_fork;
         second_fork = philo->left_fork;
@@ -87,21 +107,38 @@ void	*routine(void *data)
 	philo->dead_time = philo->data->time_to_die + ft_get_time();
 	if (pthread_create(&philo->td, NULL, &check_if_died, philo))
 		return (NULL);
-	while (philo->data->live && philo->meals != philo->data->repeat)
+	while (!philo->full)
+	{
+		pthread_mutex_lock(&philo->data->died_mtx);
+		if (!philo->data->live)
+		{
+			pthread_mutex_unlock(&philo->data->died_mtx);
+			break;
+		}
+		pthread_mutex_unlock(&philo->data->died_mtx);
 		try_to_eat(philo);
+	}
 	if (pthread_join(philo->td, NULL))
 		return (NULL);
 	return (NULL);
 }
-
 
 int	one_philo(t_data *data)
 {
 	if (pthread_create(&data->threads[0], NULL, &routine, &data->philo[0]))
 		return (0);
 	pthread_detach(data->threads[0]);
-	while (data->live)
+	while (1)
+	{
+		pthread_mutex_lock(&data->died_mtx);
+		if (!data->live)
+		{
+			pthread_mutex_unlock(&data->died_mtx);
+			break;
+		}
+		pthread_mutex_unlock(&data->died_mtx);
 		ft_usleep(1);
+	}
 	return (1);
 }
 

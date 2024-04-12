@@ -48,8 +48,11 @@ typedef struct s_data
 	t_philo			*philo;
 	pthread_mutex_t	*forks;
 	pthread_t		*threads;
+	pthread_t		*waiter;
 	pthread_mutex_t	status;
 	pthread_mutex_t	data_locker;
+	pthread_mutex_t	full_mtx;
+	pthread_mutex_t	died_mtx;
 }				t_data;
 
 //INPUT

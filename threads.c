@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/12 16:52:23 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/13 22:53:19 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,29 +14,29 @@
 
 void	print_status(char *str, t_philo *philo)
 {
-	pthread_mutex_lock(&philo->data->status);
+	pthread_mutex_lock(&philo->data->print_mtx);
 	if (!ft_strncmp(str, "died", 4) && is_philos_live(philo))	
 	{
-		pthread_mutex_lock(&philo->data->died_mtx);
+		pthread_mutex_lock(&philo->data->table_mtx);
 		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
 		philo->data->live = 0;
-		pthread_mutex_unlock(&philo->data->died_mtx);
+		pthread_mutex_unlock(&philo->data->table_mtx);
 	}
 	else if (is_philos_live(philo))
 		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
-	pthread_mutex_unlock(&philo->data->status);
+	pthread_mutex_unlock(&philo->data->print_mtx);
 }
 
 int	is_philo_full(t_philo *philo)
 {
 	int	full_signal;
 
-	pthread_mutex_lock(&philo->full_mtx);
+	pthread_mutex_lock(&philo->philo_mtx);
 	if (philo->full)
 		full_signal = 1;
 	else
 		full_signal = 0;
-	pthread_mutex_unlock(&philo->full_mtx);
+	pthread_mutex_unlock(&philo->philo_mtx);
 	return (full_signal);
 }
 
@@ -44,29 +44,15 @@ int	is_philos_live(t_philo *philo)
 {
 	int	dead_signal;	
 
-	pthread_mutex_lock(&philo->data->died_mtx);
+	pthread_mutex_lock(&philo->data->table_mtx);
 	if (!philo->data->live)
 		dead_signal = 0;
 	else
 		dead_signal = 1;
-	pthread_mutex_unlock(&philo->data->died_mtx);
+	pthread_mutex_unlock(&philo->data->table_mtx);
 	return (dead_signal); 
 }
 
-void	*check_if_died(void *data)
-{
-	t_philo	*philo;
-
-	philo = (t_philo *)data;
-	while (!is_philo_full(philo) && is_philos_live(philo))
-	{
-		pthread_mutex_lock(&philo->p_mtx);
-		if (ft_get_time() > philo->dead_time)
-				print_status("died", philo);
-		pthread_mutex_unlock(&philo->p_mtx);
-	}
-	return (NULL);
-}
 
 void	hold_forks(pthread_mutex_t *first, pthread_mutex_t *second, t_philo *philo)
 {
@@ -75,17 +61,17 @@ void	hold_forks(pthread_mutex_t *first, pthread_mutex_t *second, t_philo *philo)
 	pthread_mutex_lock(second);
 	print_status(FORKS, philo);
 	print_status(EAT, philo);
-	pthread_mutex_lock(&philo->p_mtx);
+	pthread_mutex_lock(&philo->philo_mtx);
 	philo->dead_time = ft_get_time() + philo->data->time_to_die;
-	pthread_mutex_unlock(&philo->p_mtx);
+	pthread_mutex_unlock(&philo->philo_mtx);
 	ft_usleep(philo->data->time_to_eat);
 	pthread_mutex_unlock(first);
     pthread_mutex_unlock(second);
-	pthread_mutex_lock(&philo->full_mtx);
+	pthread_mutex_lock(&philo->philo_mtx);
 	philo->meals++;
 	if (philo->meals == philo->data->repeat)
 		philo->full = 1;
-	pthread_mutex_unlock(&philo->full_mtx);
+	pthread_mutex_unlock(&philo->philo_mtx);
 	print_status(SLEEP, philo);
 	ft_usleep(philo->data->time_to_sleep);
 	print_status(THINK, philo);
@@ -115,23 +101,64 @@ void	*routine(void *data)
 
 	philo = (t_philo *)data;
 	philo->dead_time = philo->data->time_to_die + ft_get_time();
-	if (pthread_create(&philo->td, NULL, &check_if_died, philo))
-		return (NULL);
 	while (!is_philo_full(philo) && is_philos_live(philo))
 		try_to_eat(philo);
-	if (pthread_join(philo->td, NULL))
-		return (NULL);
+	return (NULL);
+}
+
+void	wait_threads(t_data *data)
+{
+	while (1)
+	{
+		pthread_mutex_lock(&data->table_mtx);
+		if (data->th_created)
+		{
+			pthread_mutex_unlock(&data->table_mtx);
+			break;
+		}
+		pthread_mutex_unlock(&data->table_mtx);
+	}
+}
+
+void	*monitor(void *arg)
+{
+	t_data *data;
+	int		i;
+
+	i = 0;
+	data = (t_data *)arg;
+	wait_threads(data);
+	while (1)
+	{
+		if (i == data->n_philos)
+			i = 0;
+		pthread_mutex_lock(&data->philo[i].philo_mtx);
+		if (ft_get_time() > data->philo[i].dead_time)
+		{
+			print_status("died", &data->philo[i]);
+			pthread_mutex_unlock(&data->philo[i].philo_mtx);
+			break;
+		}
+		pthread_mutex_unlock(&data->philo[i].philo_mtx);
+		i++;
+	}
 	return (NULL);
 }
 
 int	one_philo(t_data *data)
 {
-    if (pthread_create(&data->threads[0], NULL, &routine, &data->philo[0]))
+    if (pthread_create(&data->monitor, NULL, &monitor, data))
 		return (0);
-	pthread_detach(data->philo[0].td);
+	if (pthread_create(&data->threads[0], NULL, &routine, &data->philo[0]))
+		return (0);
+	pthread_mutex_lock(&data->table_mtx);
+	data->th_created = 1;
+	pthread_mutex_unlock(&data->table_mtx);
 	pthread_detach(data->threads[0]);
     while (is_philos_live(&data->philo[0]))
-    	ft_usleep(1);
+    	;
+	if (pthread_join(data->monitor, NULL))
+		return (0);
     return (1);
 }
 
@@ -143,12 +170,17 @@ int	start_dinner(t_data *data)
 	data->start_time = ft_get_time();
 	if (data->n_philos == 1)
 		return (one_philo(data));
+	if (pthread_create(&data->monitor, NULL, &monitor, data))
+		return (0);
 	while (i < data->n_philos)
 	{
 		if (pthread_create(&data->threads[i], NULL, &routine, &data->philo[i]))
 			return (error_philo("Error: Thread Create.\n"));
 		i++;
 	}
+	pthread_mutex_lock(&data->table_mtx);
+	data->th_created = 1;
+	pthread_mutex_unlock(&data->table_mtx);
 	i = 0;
 	while (i < data->n_philos)
 	{
@@ -156,5 +188,7 @@ int	start_dinner(t_data *data)
 			return (error_philo("Error: Thread Join.\n"));
 		i++;
 	}
+	if (pthread_join(data->monitor, NULL))
+		return (0);
 	return (1);
 }

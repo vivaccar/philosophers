@@ -27,11 +27,9 @@ typedef struct s_philo
 	int					id;
 	pthread_mutex_t		*left_fork;
 	pthread_mutex_t		*right_fork;
-	pthread_mutex_t		p_mtx;
-	pthread_mutex_t		full_mtx;
+	pthread_mutex_t		philo_mtx;
 	struct s_data		*data;
 	size_t				dead_time;
-	pthread_t			td;
 	int					meals;
 	int					full;
 }					t_philo;
@@ -44,14 +42,14 @@ typedef struct s_data
 	long			time_to_eat;
 	long			repeat;
 	int				live;
+	int				th_created;
 	size_t			start_time;
 	t_philo			*philo;
 	pthread_mutex_t	*forks;
 	pthread_t		*threads;
-	pthread_mutex_t	status;
-	pthread_mutex_t	data_locker;
-	pthread_mutex_t	died_mtx;
-	pthread_mutex_t	create_mtx;
+	pthread_t		monitor;
+	pthread_mutex_t	table_mtx;
+	pthread_mutex_t	print_mtx;
 }				t_data;
 
 //INPUT

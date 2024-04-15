@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
+/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/13 22:35:29 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/15 14:57:11 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,14 +83,14 @@ void	destroy_data(t_data *data)
 	i = 0;
 	while (i < data->n_philos)
 	{
-		if (data->n_philos > 1)
-			pthread_mutex_destroy(&data->forks[i]);
+/* 		if (data->n_philos == 1)
+			pthread_mutex_unlock(&data->forks[i]); */
+		pthread_mutex_destroy(&data->forks[i]);
 		pthread_mutex_destroy(&data->philo[i].philo_mtx);
 		i++;
 	}
 	pthread_mutex_destroy(&data->table_mtx);
 	pthread_mutex_destroy(&data->print_mtx);
-	//pthread_mutex_destroy(&data->create_mtx);
 	if (data->philo)
 		free(data->philo);
 	if (data->threads)

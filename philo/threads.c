@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
+/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/13 22:53:19 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/15 15:02:37 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void	print_status(char *str, t_philo *philo)
 {
 	pthread_mutex_lock(&philo->data->print_mtx);
-	if (!ft_strncmp(str, "died", 4) && is_philos_live(philo))	
+	if (!ft_strncmp(str, "died", 4) && is_philos_live(philo))
 	{
 		pthread_mutex_lock(&philo->data->table_mtx);
 		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
@@ -58,6 +58,7 @@ void	hold_forks(pthread_mutex_t *first, pthread_mutex_t *second, t_philo *philo)
 {
 	pthread_mutex_lock(first);
 	print_status(FORKS, philo);
+	
 	pthread_mutex_lock(second);
 	print_status(FORKS, philo);
 	print_status(EAT, philo);
@@ -70,7 +71,10 @@ void	hold_forks(pthread_mutex_t *first, pthread_mutex_t *second, t_philo *philo)
 	pthread_mutex_lock(&philo->philo_mtx);
 	philo->meals++;
 	if (philo->meals == philo->data->repeat)
+	{
 		philo->full = 1;
+		philo->dead_time = 0;
+	}
 	pthread_mutex_unlock(&philo->philo_mtx);
 	print_status(SLEEP, philo);
 	ft_usleep(philo->data->time_to_sleep);
@@ -92,6 +96,7 @@ void	try_to_eat(t_philo *philo)
         first_fork = philo->right_fork;
         second_fork = philo->left_fork;
     }
+	if (philo->data->n_philos == 1)
 	hold_forks(first_fork, second_fork, philo);
 }
 
@@ -100,7 +105,9 @@ void	*routine(void *data)
 	t_philo	*philo;
 
 	philo = (t_philo *)data;
+	pthread_mutex_lock(&philo->philo_mtx);
 	philo->dead_time = philo->data->time_to_die + ft_get_time();
+	pthread_mutex_unlock(&philo->philo_mtx);
 	while (!is_philo_full(philo) && is_philos_live(philo))
 		try_to_eat(philo);
 	return (NULL);
@@ -120,6 +127,19 @@ void	wait_threads(t_data *data)
 	}
 }
 
+int	dinner_running(t_data *data)
+{
+	int	dinner;
+
+	pthread_mutex_lock(&data->table_mtx);
+	if (data->dinner_running == 0)
+		dinner = 0;
+	else
+		dinner = 1;
+	pthread_mutex_unlock(&data->table_mtx);
+	return (dinner);
+}
+
 void	*monitor(void *arg)
 {
 	t_data *data;
@@ -128,12 +148,12 @@ void	*monitor(void *arg)
 	i = 0;
 	data = (t_data *)arg;
 	wait_threads(data);
-	while (1)
+	while (dinner_running(data))
 	{
 		if (i == data->n_philos)
 			i = 0;
 		pthread_mutex_lock(&data->philo[i].philo_mtx);
-		if (ft_get_time() > data->philo[i].dead_time)
+		if (ft_get_time() > data->philo[i].dead_time && data->philo[i].dead_time != 0)
 		{
 			print_status("died", &data->philo[i]);
 			pthread_mutex_unlock(&data->philo[i].philo_mtx);
@@ -155,23 +175,21 @@ int	one_philo(t_data *data)
 	data->th_created = 1;
 	pthread_mutex_unlock(&data->table_mtx);
 	pthread_detach(data->threads[0]);
-    while (is_philos_live(&data->philo[0]))
-    	;
+    while (1)
+    {
+		if (!is_philos_live(&data->philo[0]))
+			break;
+	}
 	if (pthread_join(data->monitor, NULL))
-		return (0);
+			return (0);
     return (1);
 }
 
-int	start_dinner(t_data *data)
+int	create_and_join_threads(t_data *data)
 {
 	int	i;
 
 	i = 0;
-	data->start_time = ft_get_time();
-	if (data->n_philos == 1)
-		return (one_philo(data));
-	if (pthread_create(&data->monitor, NULL, &monitor, data))
-		return (0);
 	while (i < data->n_philos)
 	{
 		if (pthread_create(&data->threads[i], NULL, &routine, &data->philo[i]))
@@ -188,6 +206,29 @@ int	start_dinner(t_data *data)
 			return (error_philo("Error: Thread Join.\n"));
 		i++;
 	}
+	return (1);
+}
+
+void	end_dinner(t_data *data)
+{
+	pthread_mutex_lock(&data->table_mtx);
+	data->dinner_running = 0;
+	pthread_mutex_unlock(&data->table_mtx);
+}
+
+int	start_dinner(t_data *data)
+{
+	int	i;
+
+	i = 0;
+	data->start_time = ft_get_time();
+	if (data->n_philos == 1)
+		return (one_philo(data));
+	if (pthread_create(&data->monitor, NULL, &monitor, data))
+		return (0);
+	if (!create_and_join_threads(data))
+		return (0);
+	end_dinner(data);
 	if (pthread_join(data->monitor, NULL))
 		return (0);
 	return (1);

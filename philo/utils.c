@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/15 16:55:28 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/15 18:47:45 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,11 +73,11 @@ long	ft_atoi(const char *str)
 int	error_philo(char *msg, t_data *data)
 {
 	printf("%s", msg);
-	if (data->philo)
-		free(data->philo);
-	if (data->threads)
-		free(data->threads);
-	if (data->forks)
+	if (data != NULL )
+		free(data);
+	if (data != NULL)
+		free(data);
+	if (data != NULL)
 		free(data->forks);
 	return (0);
 }
@@ -95,10 +95,10 @@ void	destroy_data(t_data *data)
 	}
 	pthread_mutex_destroy(&data->table_mtx);
 	pthread_mutex_destroy(&data->print_mtx);
-	if (data->philo)
+	if (data)
 		free(data->philo);
-	if (data->threads)
+	if (data)
 		free(data->threads);
-	if (data->forks)
+	if (data)
 		free(data->forks);
 }

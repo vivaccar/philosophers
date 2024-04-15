@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/15 16:57:51 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/15 19:29:28 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,7 @@ void	wait_threads(t_data *data)
 			break;
 		}
 		pthread_mutex_unlock(&data->table_mtx);
+		ft_usleep(1);
 	}
 }
 
@@ -191,6 +192,7 @@ int	one_philo(t_data *data)
     {
 		if (!is_philos_live(&data->philo[0]))
 			break;
+		ft_usleep(1);
 	}
 	if (pthread_join(data->monitor, NULL))
 			return (0);

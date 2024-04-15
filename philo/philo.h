@@ -43,6 +43,7 @@ typedef struct s_data
 	long			repeat;
 	int				live;
 	int				th_created;
+	int				dinner_running;
 	size_t			start_time;
 	t_philo			*philo;
 	pthread_mutex_t	*forks;
@@ -79,5 +80,6 @@ void	sleep_and_think(t_philo *philo);
 void	*routine(void *data);
 int		start_dinner(t_data *data);
 int		is_philos_live(t_philo *philo);
+int		is_philo_full(t_philo *philo);
 
 #endif

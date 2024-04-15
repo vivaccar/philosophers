@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
+/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:45:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/13 22:26:51 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/15 11:02:58 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ void	deliver_forks(t_data *data)
 			data->philo[i - 1].left_fork = &data->forks[i];
 		i++;
 	}
+	data->dinner_running = 1;
 	data->th_created = 0;
 	pthread_mutex_init(&data->print_mtx, NULL);
 	pthread_mutex_init(&data->table_mtx, NULL);

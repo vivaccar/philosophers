@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/15 19:29:28 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/16 00:10:54 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,19 @@
 
 void	print_status(char *str, t_philo *philo)
 {
+	size_t	time;
+
+	time = ft_get_time() - philo->data->start_time;
 	pthread_mutex_lock(&philo->data->print_mtx);
 	if (!ft_strncmp(str, "died", 4) && is_philos_live(philo))
 	{
 		pthread_mutex_lock(&philo->data->table_mtx);
-		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
+		printf("%zu %i %s\n", time, philo->id, str);
 		philo->data->live = 0;
 		pthread_mutex_unlock(&philo->data->table_mtx);
 	}
 	else if (is_philos_live(philo))
-		printf("%zu %i %s\n", ft_get_time() - philo->data->start_time, philo->id, str);
+		printf("%zu %i %s\n", time, philo->id, str);
 	pthread_mutex_unlock(&philo->data->print_mtx);
 }
 
@@ -50,23 +53,37 @@ int	is_philos_live(t_philo *philo)
 	else
 		dead_signal = 1;
 	pthread_mutex_unlock(&philo->data->table_mtx);
-	return (dead_signal); 
+	return (dead_signal);
 }
 
-
-void	hold_forks(pthread_mutex_t *first, pthread_mutex_t *second, t_philo *philo)
+void	hold(t_philo *philo, pthread_mutex_t *first, pthread_mutex_t *second)
 {
 	pthread_mutex_lock(first);
 	print_status(FORKS, philo);
 	pthread_mutex_lock(second);
 	print_status(FORKS, philo);
-	print_status(EAT, philo);
+}
+
+void	eating(t_philo *philo)
+{
 	pthread_mutex_lock(&philo->philo_mtx);
 	philo->dead_time = ft_get_time() + philo->data->time_to_die;
 	pthread_mutex_unlock(&philo->philo_mtx);
+	print_status(EAT, philo);
 	ft_usleep(philo->data->time_to_eat);
-	pthread_mutex_unlock(first);
-    pthread_mutex_unlock(second);
+}
+
+void	drop(pthread_mutex_t *first_fork, pthread_mutex_t *second_fork)
+{
+	pthread_mutex_unlock(first_fork);
+	pthread_mutex_unlock(second_fork);
+}
+
+void	try_eat(t_philo *philo, pthread_mutex_t *first, pthread_mutex_t *second)
+{
+	hold(philo, first, second);
+	eating(philo);
+	drop(first, second);
 	pthread_mutex_lock(&philo->philo_mtx);
 	philo->meals++;
 	if (philo->meals == philo->data->repeat)
@@ -80,24 +97,6 @@ void	hold_forks(pthread_mutex_t *first, pthread_mutex_t *second, t_philo *philo)
 	print_status(THINK, philo);
 }
 
-void	try_to_eat(t_philo *philo)
-{
-	pthread_mutex_t *first_fork;
-    pthread_mutex_t *second_fork;
-
-	if (philo->id % 2 == 0)
-	{
-        first_fork = philo->left_fork;
-        second_fork = philo->right_fork;
-    }
-	else
-	{
-        first_fork = philo->right_fork;
-        second_fork = philo->left_fork;
-    }
-	hold_forks(first_fork, second_fork, philo);
-}
-
 void	wait_threads(t_data *data)
 {
 	while (1)
@@ -106,7 +105,7 @@ void	wait_threads(t_data *data)
 		if (data->th_created)
 		{
 			pthread_mutex_unlock(&data->table_mtx);
-			break;
+			break ;
 		}
 		pthread_mutex_unlock(&data->table_mtx);
 		ft_usleep(1);
@@ -115,15 +114,27 @@ void	wait_threads(t_data *data)
 
 void	*routine(void *data)
 {
-	t_philo	*philo;
+	t_philo			*philo;
+	pthread_mutex_t	*first_fork;
+	pthread_mutex_t	*second_fork;
 
 	philo = (t_philo *)data;
+	if (philo->id % 2 == 0)
+	{
+		first_fork = philo->left_fork;
+		second_fork = philo->right_fork;
+	}
+	else
+	{
+		first_fork = philo->right_fork;
+		second_fork = philo->left_fork;
+	}
 	wait_threads(philo->data);
 	pthread_mutex_lock(&philo->philo_mtx);
 	philo->dead_time = philo->data->time_to_die + ft_get_time();
 	pthread_mutex_unlock(&philo->philo_mtx);
 	while (!is_philo_full(philo) && is_philos_live(philo))
-		try_to_eat(philo);
+		try_eat(philo, first_fork, second_fork);
 	return (NULL);
 }
 
@@ -142,7 +153,7 @@ int	dinner_running(t_data *data)
 
 void	*monitor(void *arg)
 {
-	t_data *data;
+	t_data	*data;
 	int		i;
 
 	i = 0;
@@ -153,11 +164,12 @@ void	*monitor(void *arg)
 		if (i == data->n_philos)
 			i = 0;
 		pthread_mutex_lock(&data->philo[i].philo_mtx);
-		if (ft_get_time() > data->philo[i].dead_time && data->philo[i].dead_time != 0)
+		if (ft_get_time() > data->philo[i].dead_time
+			&& data->philo[i].dead_time != 0)
 		{
 			print_status("died", &data->philo[i]);
 			pthread_mutex_unlock(&data->philo[i].philo_mtx);
-			break;
+			break ;
 		}
 		pthread_mutex_unlock(&data->philo[i].philo_mtx);
 		i++;
@@ -168,35 +180,34 @@ void	*monitor(void *arg)
 void	*only_one(void *arg)
 {
 	t_philo	*philo;
-	philo = (t_philo *)arg;
 
+	philo = (t_philo *)arg;
 	pthread_mutex_lock(philo->right_fork);
 	print_status(FORKS, philo);
 	pthread_mutex_unlock(philo->right_fork);
 	return (NULL);
 }
 
-
 int	one_philo(t_data *data)
 {
-    if (pthread_create(&data->monitor, NULL, &monitor, data))
-		return (0);
+	if (pthread_create(&data->monitor, NULL, &monitor, data))
+		return (error_philo("Error: Monitoring Thread!\n", data));
 	if (pthread_create(&data->threads[0], NULL, &only_one, &data->philo[0]))
-		return (0);
+		return (error_philo("Error: Philosophers Threads!\n", data));
 	pthread_mutex_lock(&data->table_mtx);
 	data->th_created = 1;
 	pthread_mutex_unlock(&data->table_mtx);
 	if (pthread_join(data->threads[0], NULL))
-		return (0);
-    while (1)
-    {
+		return (error_philo("Error: Philosophers threads join!\n", data));
+	while (1)
+	{
 		if (!is_philos_live(&data->philo[0]))
-			break;
+			break ;
 		ft_usleep(1);
 	}
 	if (pthread_join(data->monitor, NULL))
-			return (0);
-    return (1);
+		return (error_philo("Error: Monitoring join!\n", data));
+	return (1);
 }
 
 int	create_and_join_threads(t_data *data)
@@ -232,9 +243,6 @@ void	end_dinner(t_data *data)
 
 int	start_dinner(t_data *data)
 {
-	int	i;
-
-	i = 0;
 	data->start_time = ft_get_time();
 	if (data->n_philos == 1)
 		return (one_philo(data));
@@ -244,6 +252,6 @@ int	start_dinner(t_data *data)
 		return (0);
 	end_dinner(data);
 	if (pthread_join(data->monitor, NULL))
-		return (0);
+		return (error_philo("Error: Join Monitoring.\n", data));
 	return (1);
 }

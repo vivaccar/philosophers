@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/15 14:57:11 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/15 16:55:28 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,15 @@ long	ft_atoi(const char *str)
 	return (result * signal);
 }
 
-int	error_philo(char *msg)
+int	error_philo(char *msg, t_data *data)
 {
 	printf("%s", msg);
+	if (data->philo)
+		free(data->philo);
+	if (data->threads)
+		free(data->threads);
+	if (data->forks)
+		free(data->forks);
 	return (0);
 }
 
@@ -83,8 +89,6 @@ void	destroy_data(t_data *data)
 	i = 0;
 	while (i < data->n_philos)
 	{
-/* 		if (data->n_philos == 1)
-			pthread_mutex_unlock(&data->forks[i]); */
 		pthread_mutex_destroy(&data->forks[i]);
 		pthread_mutex_destroy(&data->philo[i].philo_mtx);
 		i++;

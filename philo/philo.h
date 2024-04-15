@@ -1,5 +1,5 @@
 #ifndef PHILO_H
-#define PHILO_H
+# define PHILO_H
 
 # include <stdio.h>
 # include <pthread.h>
@@ -13,12 +13,6 @@
 # define SLEEP "is sleeping"
 # define THINK "is thinking"
 # define DIED "died"
-# define E_SLEEP "\U0001F4A4"
-# define E_DIED "\U00002620"
-# define E_THINKING "\U0001F914"
-# define E_FORKS "\U0001F374"
-# define E_EAT "\U0001F60B"
-
 
 struct		s_data;
 
@@ -61,16 +55,15 @@ int		argument_is_number(int ac, char **av);
 
 //INIT
 int		init_philos(t_data *data);
-void	deliver_forks(t_data *data);
+void	init_forks_and_mutexes(t_data *data);
 
 //UTILS
 long	ft_atoi(const char *str);
 int		error_philo(char *msg, t_data *data);
-size_t	ft_get_time();
-int 	ft_usleep(size_t miliseconds);
+size_t	ft_get_time(void);
+int		ft_usleep(size_t miliseconds);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 void	destroy_data(t_data *data);
-
 
 //THREAD
 void	print_status(char *str, t_philo *philo);

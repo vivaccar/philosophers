@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:21 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/15 18:42:07 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/15 23:43:47 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,12 @@ int	check_overflow_and_signal(t_data *data)
 {
 	if (data->n_philos < 1)
 		return (error_philo("Error: Must have at least 1 philosopher\n", NULL));
-	if (data->repeat)
-	if (data->time_to_die < 0 || data->time_to_eat < 0 || data->time_to_sleep < 0) 
-		return (error_philo("Error: Only positive numbers as parameters!\n", NULL));
-	if (data->n_philos > INT_MAX || data->repeat > INT_MAX || data->time_to_eat >INT_MAX
-		|| data->time_to_sleep > INT_MAX || data->time_to_die > INT_MAX)
+	if (data->time_to_die < 0 || data->time_to_eat < 0
+		|| data->time_to_sleep < 0)
+		return (error_philo("Error: Only positive numbers!\n", NULL));
+	if (data->n_philos > INT_MAX || data->repeat > INT_MAX
+		|| data->time_to_eat > INT_MAX || data->time_to_sleep > INT_MAX
+		|| data->time_to_die > INT_MAX)
 		return (error_philo("Error: INT_MAX is 2147483647!\n", NULL));
 	return (1);
 }
@@ -54,12 +55,14 @@ int	init_data(char **av, t_data *data)
 	data->time_to_eat = ft_atoi(av[3]);
 	data->time_to_sleep = ft_atoi(av[4]);
 	data->live = 1;
+	data->dinner_running = 1;
+	data->th_created = 0;
 	if (av[5] && ft_atoi(av[5]) > 0)
 		data->repeat = ft_atoi(av[5]);
 	else if (!av[5])
 		data->repeat = -1;
 	else
-		return (error_philo("Error: Only positive numbers as parameters!\n", NULL));
+		return (error_philo("Error: Only positive numbers!\n", NULL));
 	if (!check_overflow_and_signal(data))
 		return (0);
 	return (1);

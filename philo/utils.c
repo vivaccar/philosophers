@@ -3,27 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/15 18:47:45 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/15 23:48:22 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-size_t	ft_get_time()
+size_t	ft_get_time(void)
 {
 	struct timeval	time;
 
-	if (gettimeofday(&time, NULL ) == -1 ) 
-		write( 2 , "Error: Gettimeof day.\n" , 22 );
+	if (gettimeofday(&time, NULL ) == -1)
+		write (2, "Error: Gettimeof day.\n", 22);
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
-int ft_usleep(size_t miliseconds)
- { 
-	size_t 	start;
+int	ft_usleep(size_t miliseconds)
+{
+	size_t	start;
 
 	start = ft_get_time();
 	while ((ft_get_time() - start) < miliseconds)
@@ -73,11 +73,11 @@ long	ft_atoi(const char *str)
 int	error_philo(char *msg, t_data *data)
 {
 	printf("%s", msg);
-	if (data != NULL )
-		free(data);
-	if (data != NULL)
-		free(data);
-	if (data != NULL)
+	if (data)
+		free(data->philo);
+	if (data)
+		free(data->threads);
+	if (data)
 		free(data->forks);
 	return (0);
 }

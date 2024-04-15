@@ -65,7 +65,7 @@ void	deliver_forks(t_data *data);
 
 //UTILS
 long	ft_atoi(const char *str);
-int		error_philo(char *msg);
+int		error_philo(char *msg, t_data *data);
 size_t	ft_get_time();
 int 	ft_usleep(size_t miliseconds);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);

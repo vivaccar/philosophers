@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:45:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/15 11:02:58 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/15 16:59:44 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,13 +43,13 @@ int	init_philos(t_data *data)
 {
 	data->forks = malloc(sizeof(pthread_mutex_t) * data->n_philos);
 	if (!data->forks)
-		return (error_philo("Error: Fork's malloc error!\n"));
+		return (error_philo("Error: Fork's malloc error!\n", data));
 	data->threads = malloc(sizeof(pthread_t) * data->n_philos);
 	if (!data->threads)
-		return (error_philo("Error: Thread's malloc error!\n"));
+		return (error_philo("Error: Thread's malloc error!\n", data));
 	data->philo = malloc(sizeof(t_philo) * data->n_philos);
 	if (!data->philo)
-		return (error_philo("Error: Philo's malloc error!\n"));
+		return (error_philo("Error: Philo's malloc error!\n", data));
 	deliver_forks(data);
 	return (1);
 }

@@ -18,6 +18,7 @@ struct		s_data;
 
 typedef struct s_philo
 {
+	pthread_t			td;
 	int					id;
 	pthread_mutex_t		*left_fork;
 	pthread_mutex_t		*right_fork;
@@ -41,7 +42,6 @@ typedef struct s_data
 	size_t			start_time;
 	t_philo			*philo;
 	pthread_mutex_t	*forks;
-	pthread_t		*threads;
 	pthread_t		monitor;
 	pthread_mutex_t	table_mtx;
 	pthread_mutex_t	print_mtx;

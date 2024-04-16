@@ -6,7 +6,7 @@
 /*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/15 23:48:22 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/16 01:42:53 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,8 +76,6 @@ int	error_philo(char *msg, t_data *data)
 	if (data)
 		free(data->philo);
 	if (data)
-		free(data->threads);
-	if (data)
 		free(data->forks);
 	return (0);
 }
@@ -97,8 +95,6 @@ void	destroy_data(t_data *data)
 	pthread_mutex_destroy(&data->print_mtx);
 	if (data)
 		free(data->philo);
-	if (data)
-		free(data->threads);
 	if (data)
 		free(data->forks);
 }

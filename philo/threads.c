@@ -6,7 +6,7 @@
 /*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/16 00:10:54 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/16 01:44:09 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,12 +192,12 @@ int	one_philo(t_data *data)
 {
 	if (pthread_create(&data->monitor, NULL, &monitor, data))
 		return (error_philo("Error: Monitoring Thread!\n", data));
-	if (pthread_create(&data->threads[0], NULL, &only_one, &data->philo[0]))
+	if (pthread_create(&data->philo[0].td, NULL, &only_one, &data->philo[0]))
 		return (error_philo("Error: Philosophers Threads!\n", data));
 	pthread_mutex_lock(&data->table_mtx);
 	data->th_created = 1;
 	pthread_mutex_unlock(&data->table_mtx);
-	if (pthread_join(data->threads[0], NULL))
+	if (pthread_join(data->philo[0].td, NULL))
 		return (error_philo("Error: Philosophers threads join!\n", data));
 	while (1)
 	{
@@ -217,7 +217,7 @@ int	create_and_join_threads(t_data *data)
 	i = 0;
 	while (i < data->n_philos)
 	{
-		if (pthread_create(&data->threads[i], NULL, &routine, &data->philo[i]))
+		if (pthread_create(&data->philo[i].td, NULL, &routine, &data->philo[i]))
 			return (error_philo("Error: Thread Create.\n", data));
 		i++;
 	}
@@ -227,7 +227,7 @@ int	create_and_join_threads(t_data *data)
 	i = 0;
 	while (i < data->n_philos)
 	{
-		if (pthread_join(data->threads[i], NULL))
+		if (pthread_join(data->philo[i].td, NULL))
 			return (error_philo("Error: Thread Join.\n", data));
 		i++;
 	}

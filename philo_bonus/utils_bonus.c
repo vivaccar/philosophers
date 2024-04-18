@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   utils_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/17 10:10:25 by vivaccar         ###   ########.fr       */
+/*   Created: 2024/04/18 13:33:20 by vivaccar          #+#    #+#             */
+/*   Updated: 2024/04/18 13:34:24 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 size_t	ft_get_time(void)
 {
@@ -68,33 +68,4 @@ long	ft_atoi(const char *str)
 		i++;
 	}
 	return (result * signal);
-}
-
-int	error_philo(char *msg, t_data *data)
-{
-	printf("%s", msg);
-	if (data)
-		free(data->philo);
-	if (data)
-		free(data->forks);
-	return (0);
-}
-
-void	destroy_data(t_data *data)
-{
-	int	i;
-
-	i = 0;
-	while (i < data->n_philos)
-	{
-		pthread_mutex_destroy(&data->forks[i]);
-		pthread_mutex_destroy(&data->philo[i].philo_mtx);
-		i++;
-	}
-	pthread_mutex_destroy(&data->table_mtx);
-	pthread_mutex_destroy(&data->print_mtx);
-	if (data)
-		free(data->philo);
-	if (data)
-		free(data->forks);
 }

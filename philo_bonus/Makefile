@@ -1,12 +1,12 @@
-SRCS	=	philo.c utils.c input.c threads.c init.c
+SRCS	=	philo_bonus.c input_bonus.c utils_bonus.c
 
 OBJS	=	$(SRCS:.c=.o)
 
 CC		=	cc
 
-NAME	=	philo
+NAME	=	philo_bonus
 
-CFLAGS  = 	-Wall -Wextra -Werror 
+CFLAGS  = 	-Wall -Wextra -Werror
 all: $(NAME)
 
 $(NAME): $(OBJS)

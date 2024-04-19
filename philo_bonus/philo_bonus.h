@@ -29,16 +29,19 @@ typedef	struct s_table
 	struct s_philo		*philo;
 	sem_t				*forks;
 	sem_t				*print;
+	sem_t				*time;
+	sem_t				*death;
+	sem_t				*full;
 }						t_table;
 
 typedef	struct s_philo
 {
-	int			id;
-	int			meals;
-	size_t		dead_time;
-	pid_t		pid;
-	t_table		*table;
-	pthread_t	td;
+	int				id;
+	int				meals;
+	size_t			dead_time;
+	pid_t			pid;
+	t_table			*table;
+	pthread_t		td;
 }				t_philo;
 
 int		check_input(int ac, char **av, t_table *table);

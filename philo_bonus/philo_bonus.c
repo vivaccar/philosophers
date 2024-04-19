@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
+/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 10:23:16 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/19 09:59:34 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/19 20:48:31 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,26 +39,9 @@ void	kill_processes(t_table *table)
 	i = 0;
 	while (i < table->n_philos)
 	{
-		kill(table->philo[i].pid, SIGINT);
+		kill(table->philo[i].pid, SIGKILL);
 		i++;
 	}
-}
-
-void	*check_if_died(void *arg)
-{
-	t_philo	*philo;
-
-	philo = (t_philo *)arg;
-	while (1)
-	{
-		if (philo->dead_time < ft_get_time())
-		{
-			printf("%zu %i died.\n", ft_get_time() - philo->table->start_time, philo->id);
-			kill_processes(philo->table);
-		}
-		usleep(1);
-	}
-	return (NULL);
 }
 
 void	print_message(t_philo *philo, char *message)
@@ -69,32 +52,90 @@ void	print_message(t_philo *philo, char *message)
 		sem_post(philo->table->print);
 }
 
+int	is_philo_live(t_philo *philo)
+{
+	int	is_live;
+
+	sem_wait(philo->table->time);
+	if (philo->dead_time < ft_get_time())
+		is_live = 0;
+	else
+		is_live = 1;
+	sem_post(philo->table->time);
+	return (is_live);
+}
+
+void	*check_if_died(void *arg)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *)arg;
+	while (1)
+	{
+		if (!is_philo_live(philo))
+		{
+			print_message(philo, DIED);
+			sem_post(philo->table->death);
+			break ;
+		}
+		usleep(1);
+	}
+	return (NULL);
+}
+
+void	hold(t_philo *philo)
+{
+		sem_wait(philo->table->forks);
+		print_message(philo, FORKS);
+		sem_wait(philo->table->forks);
+		print_message(philo, FORKS);
+}
+
+
+void	eat(t_philo *philo)
+{
+		print_message(philo, EAT);
+		sem_wait(philo->table->time);
+		philo->dead_time = ft_get_time() + philo->table->time_to_die;
+		sem_post(philo->table->time);
+		ft_usleep(philo->table->time_to_eat);
+		philo->meals++;
+}
+
+void	drop(t_philo *philo)
+{
+		sem_post(philo->table->forks);
+		sem_post(philo->table->forks);
+}
+
+void	sleep_and_think(t_philo *philo)
+{
+		print_message(philo, SLEEP);
+		ft_usleep(philo->table->time_to_sleep);
+		print_message(philo, THINK);
+}
+
 void	start_to_eat(t_philo *philo)
 {	
 	int	i;
 
 	i = 0;
+	if (philo->id % 2 == 0)
+		sleep(1);
 	philo->dead_time = ft_get_time() + philo->table->time_to_die;
 	if (pthread_create(&philo->td, NULL, &check_if_died, philo))
 		return ;
-	while (i != philo->table->repeat)
+	pthread_detach(philo->td);
+	while (philo->table->repeat != i)
 	{
-		sem_wait(philo->table->forks);
-		print_message(philo, FORKS);
-		sem_wait(philo->table->forks);
-		print_message(philo, FORKS);
-		print_message(philo, EAT);
-		philo->dead_time = ft_get_time() + philo->table->time_to_die;
-		ft_usleep(philo->table->time_to_eat);
-		sem_post(philo->table->forks);
-		sem_post(philo->table->forks);
-		print_message(philo, SLEEP);
-		ft_usleep(philo->table->time_to_sleep);
-		print_message(philo, THINK);
+		hold(philo);
+		eat(philo);
+		drop(philo);
+		if (philo->meals == philo->table->repeat)
+			sem_post(philo->table->full);
+		sleep_and_think(philo);
 		i++;
 	}
-	if (pthread_detach(philo->td))
-		return ;
 }
 
 int	create_processes(t_table *table)
@@ -109,7 +150,6 @@ int	create_processes(t_table *table)
 		if (table->philo[i].pid == 0)
 		{
 			start_to_eat(&table->philo[i]);
-			exit(0);
 		}
 		i++;
 	}
@@ -120,15 +160,21 @@ void	init_semaphores(t_table *table)
 {
 	sem_unlink("forks");
 	sem_unlink("print");
-	table->forks = sem_open("forks", O_CREAT, 0644, table->n_philos);
-	table->print = sem_open("print", O_CREAT, 0644, 1);
+	sem_unlink("time");
+	sem_unlink("death");
+	sem_unlink("full");
+	table->full = sem_open("full", O_CREAT, 0600, 0);
+	table->death = sem_open("death", O_CREAT, 0600, 0);
+	table->time = sem_open("time", O_CREAT, 0600, 1);
+	table->forks = sem_open("forks", O_CREAT, 0600, table->n_philos);
+	table->print = sem_open("print", O_CREAT, 0600, 1);
 }
 
 int	main(int ac, char **av)
 {
 	t_table	table;
-	int		x;
-	int		j = 0;
+	// int		x;
+	// int		j = 0;
 
 	if (!check_input(ac, av, &table))
 		return (0);
@@ -136,21 +182,20 @@ int	main(int ac, char **av)
 		return (0);
 	init_semaphores(&table);
 	create_processes(&table);
-	while (j < table.n_philos)
+	printf("before while!");
+/* 	while (j < table.n_philos)
 	{
-		waitpid(0, &x, 0);
+		waitpid(table.philo[j].pid, &x, 0);
 		j++;
-	}
+	} */
+	sem_wait(table.death);
+	kill_processes(&table);
+	sem_close(table.death);
+	sem_close(table.time);
 	sem_close(table.forks);
 	sem_close(table.print);
 	free(table.philo);
-/* 	for (int i = 0; i < table.n_philos; i++)
-		printf("pid: %i", table.philo[i].pid); */
-	//return (0);
-/* 	printf("time to die: %zu\n", table.time_to_die);
-	printf("time to eat: %zu\n", table.time_to_eat);
-	printf("time to sleep: %zu\n", table.time_to_sleep);
-	printf("philos: %ld\n", table.n_philos); */
+	printf("main process finishing!\n");
 }
 
 

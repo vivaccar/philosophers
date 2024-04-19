@@ -6,7 +6,7 @@ CC		=	cc
 
 NAME	=	philo_bonus
 
-CFLAGS  = 	-Wall -Wextra -Werror
+CFLAGS  = 	-Wall -Wextra -Werror -g -fsanitize=thread
 all: $(NAME)
 
 $(NAME): $(OBJS)

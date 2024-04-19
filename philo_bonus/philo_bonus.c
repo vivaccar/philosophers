@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 10:23:16 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/18 18:48:31 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/19 09:59:34 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,14 @@ void	*check_if_died(void *arg)
 	return (NULL);
 }
 
+void	print_message(t_philo *philo, char *message)
+{
+	sem_wait(philo->table->print);
+	printf("%zu %i %s\n", ft_get_time() - philo->table->start_time, philo->id, message);
+	if (ft_strncmp(message, DIED, 4))
+		sem_post(philo->table->print);
+}
+
 void	start_to_eat(t_philo *philo)
 {	
 	int	i;
@@ -72,17 +80,17 @@ void	start_to_eat(t_philo *philo)
 	while (i != philo->table->repeat)
 	{
 		sem_wait(philo->table->forks);
-		printf("%zu %i has taken a fork\n", ft_get_time() - philo->table->start_time, philo->id);
+		print_message(philo, FORKS);
 		sem_wait(philo->table->forks);
-		printf("%zu %i has taken a fork\n", ft_get_time() - philo->table->start_time, philo->id);
-		printf("%zu %i is eating\n", ft_get_time() - philo->table->start_time, philo->id);
+		print_message(philo, FORKS);
+		print_message(philo, EAT);
 		philo->dead_time = ft_get_time() + philo->table->time_to_die;
 		ft_usleep(philo->table->time_to_eat);
-		printf("%zu %i is sleeping\n", ft_get_time() - philo->table->start_time, philo->id);
 		sem_post(philo->table->forks);
 		sem_post(philo->table->forks);
+		print_message(philo, SLEEP);
 		ft_usleep(philo->table->time_to_sleep);
-		printf("%zu %i is thinking\n", ft_get_time() - philo->table->start_time, philo->id);
+		print_message(philo, THINK);
 		i++;
 	}
 	if (pthread_detach(philo->td))
@@ -111,7 +119,9 @@ int	create_processes(t_table *table)
 void	init_semaphores(t_table *table)
 {
 	sem_unlink("forks");
+	sem_unlink("print");
 	table->forks = sem_open("forks", O_CREAT, 0644, table->n_philos);
+	table->print = sem_open("print", O_CREAT, 0644, 1);
 }
 
 int	main(int ac, char **av)
@@ -132,6 +142,7 @@ int	main(int ac, char **av)
 		j++;
 	}
 	sem_close(table.forks);
+	sem_close(table.print);
 	free(table.philo);
 /* 	for (int i = 0; i < table.n_philos; i++)
 		printf("pid: %i", table.philo[i].pid); */

@@ -12,17 +12,23 @@
 # include <fcntl.h>
 # include <signal.h>
 
+# define EAT "is eating"
+# define FORKS "has taken a fork"
+# define SLEEP "is sleeping"
+# define THINK "is thinking"
+# define DIED "died"
 
 typedef	struct s_table
 {
 	long				n_philos;
-	size_t				time_to_die;
-	size_t				time_to_eat;
-	size_t				time_to_sleep;
-	size_t				start_time;
+	long				time_to_die;
+	long				time_to_eat;
+	long				time_to_sleep;
+	long				start_time;
 	long				repeat;
 	struct s_philo		*philo;
 	sem_t				*forks;
+	sem_t				*print;
 }						t_table;
 
 typedef	struct s_philo

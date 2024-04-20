@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/19 21:02:27 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/20 13:02:42 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,17 +121,17 @@ void	*routine(void *data)
 	philo = (t_philo *)data;
 	if (philo->id % 2 == 0)
 	{
-		first_fork = philo->left_fork;
-		second_fork = philo->right_fork;
-	}
-	else
-	{
 		first_fork = philo->right_fork;
 		second_fork = philo->left_fork;
 	}
+	else
+	{
+		first_fork = philo->left_fork;
+		second_fork = philo->right_fork;
+	}
 	philo->dead_time = philo->data->time_to_die + ft_get_time();
 	wait_threads(philo->data);
-	if (philo->id % 2 == 0)
+	if (philo->id % 2 != 0)
 		ft_usleep(50);
 	while (!is_philo_full(philo) && is_philos_live(philo))
 		try_eat(philo, first_fork, second_fork);

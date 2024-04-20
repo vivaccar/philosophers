@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 10:23:16 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/20 19:47:27 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/20 19:56:21 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,7 +143,7 @@ void	start_to_eat(t_philo *philo)
 
 	i = 0;
 	if (philo->id % 2 == 0)
-		sleep(1);
+		ft_usleep(2);
 	philo->dead_time = ft_get_time() + philo->table->time_to_die;
 	if (pthread_create(&philo->td, NULL, &check_if_died, philo))
 		return ;

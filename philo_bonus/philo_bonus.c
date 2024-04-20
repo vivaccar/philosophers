@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 10:23:16 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/19 20:48:31 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/20 19:47:27 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int	is_philo_live(t_philo *philo)
 	int	is_live;
 
 	sem_wait(philo->table->time);
-	if (philo->dead_time < ft_get_time())
+	if (philo->dead_time <= ft_get_time())
 		is_live = 0;
 	else
 		is_live = 1;
@@ -65,18 +65,34 @@ int	is_philo_live(t_philo *philo)
 	return (is_live);
 }
 
+int	is_philo_full(t_philo *philo)
+{
+	if (philo->meals == philo->table->repeat)
+		return (1);
+	else
+		return (0);
+}
+
 void	*check_if_died(void *arg)
 {
 	t_philo	*philo;
+	int		i;
 
+	i = 0;
 	philo = (t_philo *)arg;
 	while (1)
 	{
 		if (!is_philo_live(philo))
 		{
 			print_message(philo, DIED);
-			sem_post(philo->table->death);
+			while (i < philo->table->n_philos)
+				sem_post(philo->table->death);
 			break ;
+		}
+		if (is_philo_full(philo))
+		{
+			sem_post(philo->table->death);
+			break;
 		}
 		usleep(1);
 	}
@@ -115,6 +131,12 @@ void	sleep_and_think(t_philo *philo)
 		print_message(philo, THINK);
 }
 
+void	wait_for_kill()
+{
+	while (42)
+		ft_usleep(42);
+}
+
 void	start_to_eat(t_philo *philo)
 {	
 	int	i;
@@ -126,16 +148,17 @@ void	start_to_eat(t_philo *philo)
 	if (pthread_create(&philo->td, NULL, &check_if_died, philo))
 		return ;
 	pthread_detach(philo->td);
-	while (philo->table->repeat != i)
+	while (1)
 	{
 		hold(philo);
 		eat(philo);
 		drop(philo);
-		if (philo->meals == philo->table->repeat)
-			sem_post(philo->table->full);
 		sleep_and_think(philo);
 		i++;
+		if (i == philo->table->repeat)
+			break;
 	}
+	wait_for_kill();
 }
 
 int	create_processes(t_table *table)
@@ -148,9 +171,7 @@ int	create_processes(t_table *table)
 	{
 		table->philo[i].pid = fork();
 		if (table->philo[i].pid == 0)
-		{
 			start_to_eat(&table->philo[i]);
-		}
 		i++;
 	}
 	return (0);
@@ -174,7 +195,7 @@ int	main(int ac, char **av)
 {
 	t_table	table;
 	// int		x;
-	// int		j = 0;
+	int		j = 0;
 
 	if (!check_input(ac, av, &table))
 		return (0);
@@ -183,13 +204,14 @@ int	main(int ac, char **av)
 	init_semaphores(&table);
 	create_processes(&table);
 	printf("before while!");
-/* 	while (j < table.n_philos)
+	while (j < table.n_philos)
 	{
-		waitpid(table.philo[j].pid, &x, 0);
+		sem_wait(table.death);
 		j++;
-	} */
-	sem_wait(table.death);
+	}
+	// sem_wait(table.death);
 	kill_processes(&table);
+	sem_close(table.full);
 	sem_close(table.death);
 	sem_close(table.time);
 	sem_close(table.forks);

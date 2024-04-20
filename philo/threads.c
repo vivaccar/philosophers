@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/20 13:02:42 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/20 19:04:34 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,32 @@ int	is_philos_live(t_philo *philo)
 	return (dead_signal);
 }
 
-void	hold(t_philo *philo, pthread_mutex_t *first, pthread_mutex_t *second)
+void	hold(t_philo *philo)
 {
-	pthread_mutex_lock(first);
+	if (philo->data->n_philos % 2 == 0)
+	{
+		if (philo->id % 2 == 0)
+		{
+			pthread_mutex_lock(philo->right_fork);
+			print_status(FORKS, philo);
+			pthread_mutex_lock(philo->left_fork);
+			print_status(FORKS, philo);
+		}
+		else
+		{
+			pthread_mutex_lock(philo->left_fork);
+			print_status(FORKS, philo);
+			pthread_mutex_lock(philo->right_fork);
+			print_status(FORKS, philo);
+		}
+	}
+	else
+	{
+	pthread_mutex_lock(philo->right_fork);
 	print_status(FORKS, philo);
-	pthread_mutex_lock(second);
+	pthread_mutex_lock(philo->left_fork);
 	print_status(FORKS, philo);
+	}
 }
 
 void	eating(t_philo *philo)
@@ -73,17 +93,17 @@ void	eating(t_philo *philo)
 	ft_usleep(philo->data->time_to_eat);
 }
 
-void	drop(pthread_mutex_t *first_fork, pthread_mutex_t *second_fork)
+void	drop(t_philo *philo)
 {
-	pthread_mutex_unlock(first_fork);
-	pthread_mutex_unlock(second_fork);
+	pthread_mutex_unlock(philo->right_fork);
+	pthread_mutex_unlock(philo->left_fork);
 }
 
-void	try_eat(t_philo *philo, pthread_mutex_t *first, pthread_mutex_t *second)
+void	try_eat(t_philo *philo)
 {
-	hold(philo, first, second);
+	hold(philo);
 	eating(philo);
-	drop(first, second);
+	drop(philo);
 	pthread_mutex_lock(&philo->philo_mtx);
 	philo->meals++;
 	if (philo->meals == philo->data->repeat)
@@ -115,26 +135,15 @@ void	wait_threads(t_data *data)
 void	*routine(void *data)
 {
 	t_philo			*philo;
-	pthread_mutex_t	*first_fork;
-	pthread_mutex_t	*second_fork;
 
 	philo = (t_philo *)data;
-	if (philo->id % 2 == 0)
-	{
-		first_fork = philo->right_fork;
-		second_fork = philo->left_fork;
-	}
-	else
-	{
-		first_fork = philo->left_fork;
-		second_fork = philo->right_fork;
-	}
+	pthread_mutex_lock(&philo->philo_mtx);
 	philo->dead_time = philo->data->time_to_die + ft_get_time();
-	wait_threads(philo->data);
-	if (philo->id % 2 != 0)
-		ft_usleep(50);
+	pthread_mutex_unlock(&philo->philo_mtx);
+	if (philo->id % 2 == 0)
+		ft_usleep(2);
 	while (!is_philo_full(philo) && is_philos_live(philo))
-		try_eat(philo, first_fork, second_fork);
+		try_eat(philo);
 	return (NULL);
 }
 
@@ -164,7 +173,7 @@ void	*monitor(void *arg)
 		if (i == data->n_philos)
 			i = 0;
 		pthread_mutex_lock(&data->philo[i].philo_mtx);
-		if (ft_get_time() > data->philo[i].dead_time
+		if (ft_get_time() >= data->philo[i].dead_time
 			&& data->philo[i].dead_time != 0)
 		{
 			print_status("died", &data->philo[i]);

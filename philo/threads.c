@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 17:05:13 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 21:43:43 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ void	*routine(void *table)
 	pthread_mutex_lock(&philo->philo_mtx);
 	philo->dead_time = philo->table->time_to_die + ft_get_time();
 	pthread_mutex_unlock(&philo->philo_mtx);
+	print_status(THINK, philo);
 	if (philo->id % 2 == 0)
 		ft_usleep(10);
 	while (!is_philo_full(philo) && is_philos_live(philo))

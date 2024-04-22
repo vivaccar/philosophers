@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 13:33:20 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 19:47:14 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 21:12:30 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,7 @@ size_t	ft_get_time(void)
 
 int	ft_usleep(size_t miliseconds)
 {
-	size_t	start;cd ..
-	
-
-	start = ft_get_time();
-	while ((ft_get_time() - start) < miliseconds)
-		usleep (500);
+	usleep(1000 * miliseconds);
 	return (0);
 }
 

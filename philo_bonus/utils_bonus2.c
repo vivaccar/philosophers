@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_bonus2.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:32:02 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 19:14:33 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 21:25:10 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,11 @@ void	wait_for_posts(t_table *table)
 	int	i;
 
 	i = 0;
+	sem_post(table->death);
 	while (i < table->n_philos)
 	{
 		sem_wait(table->death);
 		i++;
 	}
+	sem_wait(table->death);
 }

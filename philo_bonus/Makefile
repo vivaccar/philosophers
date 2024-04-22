@@ -1,4 +1,4 @@
-SRCS	=	philo_bonus.c input_bonus.c utils_bonus.c
+SRCS	=	main_bonus.c input_bonus.c utils_bonus.c utils_bonus2.c  processes_bonus.c init_bonus.c eating_bonus.c
 
 OBJS	=	$(SRCS:.c=.o)
 

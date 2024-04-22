@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   processes_bonus.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:34:24 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 19:40:52 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 21:50:21 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ void	start_to_eat(t_philo *philo)
 	if (pthread_create(&philo->td, NULL, &check_if_died, philo))
 		return ;
 	pthread_detach(philo->td);
+	print_message(philo, THINK);
 	if (philo->id % 2 == 0)
 		ft_usleep(15);
 	while (1)

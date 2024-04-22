@@ -6,11 +6,26 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/17 10:10:25 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 12:41:45 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+void	wait_threads(t_data *data)
+{
+	while (1)
+	{
+		pthread_mutex_lock(&data->table_mtx);
+		if (data->th_created)
+		{
+			pthread_mutex_unlock(&data->table_mtx);
+			break ;
+		}
+		pthread_mutex_unlock(&data->table_mtx);
+		usleep(1);
+	}
+}
 
 size_t	ft_get_time(void)
 {
@@ -29,45 +44,6 @@ int	ft_usleep(size_t miliseconds)
 	while ((ft_get_time() - start) < miliseconds)
 		usleep (500);
 	return (0);
-}
-
-int	ft_strncmp(const char *s1, const char *s2, size_t n)
-{
-	size_t	i;
-
-	i = 0;
-	while (((s1[i]) || (s2[i])) && (i < n))
-	{
-		if (s1[i] != s2[i])
-			return ((unsigned char)s1[i] - (unsigned char)s2[i]);
-		i++;
-	}
-	return (0);
-}
-
-long	ft_atoi(const char *str)
-{
-	int		i;
-	long	result;
-	long	signal;
-
-	signal = 1;
-	i = 0;
-	result = 0;
-	while ((str[i] >= 9 && str[i] <= 13) || (str[i] == ' '))
-		i++;
-	if ((str[i] == '+' || str[i] == '-'))
-	{
-		if (str[i] == '-')
-			signal = signal * -1;
-		i++;
-	}
-	while ((str[i] >= '0' && str[i] <= '9'))
-	{
-		result = result * 10 + str[i] - '0';
-		i++;
-	}
-	return (result * signal);
 }
 
 int	error_philo(char *msg, t_data *data)

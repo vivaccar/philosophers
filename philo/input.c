@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:21 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/18 13:31:39 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 12:48:34 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@ int	argument_is_number(int ac, char **av)
 	while (i < ac)
 	{
 		j = 0;
+		if (av[i][0] == 0)
+			return (0);
 		while (av[i][j])
 		{
 			if (av[i][0] == '-' && j == 0)
@@ -38,9 +40,9 @@ int	check_overflow_and_signal(t_data *data)
 {
 	if (data->n_philos < 1)
 		return (error_philo("Error: Must have at least 1 philosopher\n", NULL));
-	if (data->time_to_die < 0 || data->time_to_eat < 0
-		|| data->time_to_sleep < 0)
-		return (error_philo("Error: Only positive numbers!\n", NULL));
+	if (data->time_to_die <= 0 || data->time_to_eat <= 0
+		|| data->time_to_sleep <= 0)
+		return (error_philo("Error: argument less than 1!\n", NULL));
 	if (data->n_philos > INT_MAX || data->repeat > INT_MAX
 		|| data->time_to_eat > INT_MAX || data->time_to_sleep > INT_MAX
 		|| data->time_to_die > INT_MAX)
@@ -62,7 +64,7 @@ int	init_data(char **av, t_data *data)
 	else if (!av[5])
 		data->repeat = -1;
 	else
-		return (error_philo("Error: Only positive numbers!\n", NULL));
+		return (error_philo("Error: argument less than 1!\n", NULL));
 	if (!check_overflow_and_signal(data))
 		return (0);
 	return (1);

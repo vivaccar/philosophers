@@ -6,98 +6,11 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/20 19:04:34 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 12:48:52 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-void	print_status(char *str, t_philo *philo)
-{
-	size_t	time;
-
-	time = ft_get_time() - philo->data->start_time;
-	pthread_mutex_lock(&philo->data->print_mtx);
-	if (!ft_strncmp(str, "died", 4) && is_philos_live(philo))
-	{
-		pthread_mutex_lock(&philo->data->table_mtx);
-		printf("%zu %i %s\n", time, philo->id, str);
-		philo->data->live = 0;
-		pthread_mutex_unlock(&philo->data->table_mtx);
-	}
-	else if (is_philos_live(philo))
-		printf("%zu %i %s\n", time, philo->id, str);
-	pthread_mutex_unlock(&philo->data->print_mtx);
-}
-
-int	is_philo_full(t_philo *philo)
-{
-	int	full_signal;
-
-	pthread_mutex_lock(&philo->philo_mtx);
-	if (philo->full)
-		full_signal = 1;
-	else
-		full_signal = 0;
-	pthread_mutex_unlock(&philo->philo_mtx);
-	return (full_signal);
-}
-
-int	is_philos_live(t_philo *philo)
-{
-	int	dead_signal;	
-
-	pthread_mutex_lock(&philo->data->table_mtx);
-	if (!philo->data->live)
-		dead_signal = 0;
-	else
-		dead_signal = 1;
-	pthread_mutex_unlock(&philo->data->table_mtx);
-	return (dead_signal);
-}
-
-void	hold(t_philo *philo)
-{
-	if (philo->data->n_philos % 2 == 0)
-	{
-		if (philo->id % 2 == 0)
-		{
-			pthread_mutex_lock(philo->right_fork);
-			print_status(FORKS, philo);
-			pthread_mutex_lock(philo->left_fork);
-			print_status(FORKS, philo);
-		}
-		else
-		{
-			pthread_mutex_lock(philo->left_fork);
-			print_status(FORKS, philo);
-			pthread_mutex_lock(philo->right_fork);
-			print_status(FORKS, philo);
-		}
-	}
-	else
-	{
-	pthread_mutex_lock(philo->right_fork);
-	print_status(FORKS, philo);
-	pthread_mutex_lock(philo->left_fork);
-	print_status(FORKS, philo);
-	}
-}
-
-void	eating(t_philo *philo)
-{
-	pthread_mutex_lock(&philo->philo_mtx);
-	philo->dead_time = ft_get_time() + philo->data->time_to_die;
-	pthread_mutex_unlock(&philo->philo_mtx);
-	print_status(EAT, philo);
-	ft_usleep(philo->data->time_to_eat);
-}
-
-void	drop(t_philo *philo)
-{
-	pthread_mutex_unlock(philo->right_fork);
-	pthread_mutex_unlock(philo->left_fork);
-}
 
 void	try_eat(t_philo *philo)
 {
@@ -117,21 +30,6 @@ void	try_eat(t_philo *philo)
 	print_status(THINK, philo);
 }
 
-void	wait_threads(t_data *data)
-{
-	while (1)
-	{
-		pthread_mutex_lock(&data->table_mtx);
-		if (data->th_created)
-		{
-			pthread_mutex_unlock(&data->table_mtx);
-			break ;
-		}
-		pthread_mutex_unlock(&data->table_mtx);
-		usleep(1);
-	}
-}
-
 void	*routine(void *data)
 {
 	t_philo			*philo;
@@ -145,19 +43,6 @@ void	*routine(void *data)
 	while (!is_philo_full(philo) && is_philos_live(philo))
 		try_eat(philo);
 	return (NULL);
-}
-
-int	dinner_running(t_data *data)
-{
-	int	dinner;
-
-	pthread_mutex_lock(&data->table_mtx);
-	if (data->dinner_running == 0)
-		dinner = 0;
-	else
-		dinner = 1;
-	pthread_mutex_unlock(&data->table_mtx);
-	return (dinner);
 }
 
 void	*monitor(void *arg)
@@ -186,39 +71,6 @@ void	*monitor(void *arg)
 	return (NULL);
 }
 
-void	*only_one(void *arg)
-{
-	t_philo	*philo;
-
-	philo = (t_philo *)arg;
-	pthread_mutex_lock(philo->right_fork);
-	print_status(FORKS, philo);
-	pthread_mutex_unlock(philo->right_fork);
-	return (NULL);
-}
-
-int	one_philo(t_data *data)
-{
-	if (pthread_create(&data->monitor, NULL, &monitor, data))
-		return (error_philo("Error: Monitoring Thread!\n", data));
-	if (pthread_create(&data->philo[0].td, NULL, &only_one, &data->philo[0]))
-		return (error_philo("Error: Philosophers Threads!\n", data));
-	pthread_mutex_lock(&data->table_mtx);
-	data->th_created = 1;
-	pthread_mutex_unlock(&data->table_mtx);
-	if (pthread_join(data->philo[0].td, NULL))
-		return (error_philo("Error: Philosophers threads join!\n", data));
-	while (1)
-	{
-		if (!is_philos_live(&data->philo[0]))
-			break ;
-		usleep(1);
-	}
-	if (pthread_join(data->monitor, NULL))
-		return (error_philo("Error: Monitoring join!\n", data));
-	return (1);
-}
-
 int	create_and_join_threads(t_data *data)
 {
 	int	i;
@@ -241,13 +93,6 @@ int	create_and_join_threads(t_data *data)
 		i++;
 	}
 	return (1);
-}
-
-void	end_dinner(t_data *data)
-{
-	pthread_mutex_lock(&data->table_mtx);
-	data->dinner_running = 0;
-	pthread_mutex_unlock(&data->table_mtx);
 }
 
 int	start_dinner(t_data *data)

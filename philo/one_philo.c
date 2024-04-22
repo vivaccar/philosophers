@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 12:44:09 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 12:49:30 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 16:48:46 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,24 +23,24 @@ void	*only_one(void *arg)
 	return (NULL);
 }
 
-int	one_philo(t_data *data)
+int	one_philo(t_table *table)
 {
-	if (pthread_create(&data->monitor, NULL, &monitor, data))
-		return (error_philo("Error: Monitoring Thread!\n", data));
-	if (pthread_create(&data->philo[0].td, NULL, &only_one, &data->philo[0]))
-		return (error_philo("Error: Philosophers Threads!\n", data));
-	pthread_mutex_lock(&data->table_mtx);
-	data->th_created = 1;
-	pthread_mutex_unlock(&data->table_mtx);
-	if (pthread_join(data->philo[0].td, NULL))
-		return (error_philo("Error: Philosophers threads join!\n", data));
+	if (pthread_create(&table->monitor, NULL, &monitor, table))
+		return (error_philo("Error: Monitoring Thread!\n", table));
+	if (pthread_create(&table->philo[0].td, NULL, &only_one, &table->philo[0]))
+		return (error_philo("Error: Philosophers Threads!\n", table));
+	pthread_mutex_lock(&table->table_mtx);
+	table->th_created = 1;
+	pthread_mutex_unlock(&table->table_mtx);
+	if (pthread_join(table->philo[0].td, NULL))
+		return (error_philo("Error: Philosophers threads join!\n", table));
 	while (1)
 	{
-		if (!is_philos_live(&data->philo[0]))
+		if (!is_philos_live(&table->philo[0]))
 			break ;
 		usleep(1);
 	}
-	if (pthread_join(data->monitor, NULL))
-		return (error_philo("Error: Monitoring join!\n", data));
+	if (pthread_join(table->monitor, NULL))
+		return (error_philo("Error: Monitoring join!\n", table));
 	return (1);
 }

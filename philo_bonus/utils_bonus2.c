@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:32:02 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 16:39:58 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 19:14:33 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ int	is_philo_live(t_philo *philo)
 		is_live = 0;
 	else
 		is_live = 1;
+	philo->live = is_live;
 	sem_post(philo->table->time);
 	return (is_live);
 }

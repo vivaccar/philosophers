@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 16:28:26 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 16:38:20 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 18:03:10 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ typedef struct s_table
 
 typedef struct s_philo
 {
+	int				live;	
 	int				id;
 	int				meals;
 	size_t			dead_time;

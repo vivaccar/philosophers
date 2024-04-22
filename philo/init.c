@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:45:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 12:39:53 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 16:47:47 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,39 +51,39 @@ int	ft_strncmp(const char *s1, const char *s2, size_t n)
 	return (0);
 }
 
-void	init_forks_and_mutexes(t_data *data)
+void	init_forks_and_mutexes(t_table *table)
 {
 	int	i;
 
 	i = 0;
-	while (i < data->n_philos)
+	while (i < table->n_philos)
 	{
-		data->philo[i].id = i + 1;
-		data->philo[i].data = data;
-		data->philo[i].meals = 0;
-		data->philo[i].full = 0;
-		data->philo[i].dead_time = ft_get_time() + data->time_to_die;
-		pthread_mutex_init(&data->forks[i], NULL);
-		pthread_mutex_init(&data->philo[i].philo_mtx, NULL);
-		data->philo[i].right_fork = &data->forks[i];
-		if (data->n_philos == i + 1)
-			data->philo[i].left_fork = &data->forks[0];
+		table->philo[i].id = i + 1;
+		table->philo[i].table = table;
+		table->philo[i].meals = 0;
+		table->philo[i].full = 0;
+		table->philo[i].dead_time = ft_get_time() + table->time_to_die;
+		pthread_mutex_init(&table->forks[i], NULL);
+		pthread_mutex_init(&table->philo[i].philo_mtx, NULL);
+		table->philo[i].right_fork = &table->forks[i];
+		if (table->n_philos == i + 1)
+			table->philo[i].left_fork = &table->forks[0];
 		else
-			data->philo[i].left_fork = &data->forks[i + 1];
+			table->philo[i].left_fork = &table->forks[i + 1];
 		i++;
 	}
-	pthread_mutex_init(&data->print_mtx, NULL);
-	pthread_mutex_init(&data->table_mtx, NULL);
+	pthread_mutex_init(&table->print_mtx, NULL);
+	pthread_mutex_init(&table->table_mtx, NULL);
 }
 
-int	init_philos(t_data *data)
+int	init_philos(t_table *table)
 {
-	data->forks = malloc(sizeof(pthread_mutex_t) * data->n_philos);
-	if (!data->forks)
-		return (error_philo("Error: Fork's malloc error!\n", data));
-	data->philo = malloc(sizeof(t_philo) * data->n_philos);
-	if (!data->philo)
-		return (error_philo("Error: Philo's malloc error!\n", data));
-	init_forks_and_mutexes(data);
+	table->forks = malloc(sizeof(pthread_mutex_t) * table->n_philos);
+	if (!table->forks)
+		return (error_philo("Error: Fork's malloc error!\n", table));
+	table->philo = malloc(sizeof(t_philo) * table->n_philos);
+	if (!table->philo)
+		return (error_philo("Error: Philo's malloc error!\n", table));
+	init_forks_and_mutexes(table);
 	return (1);
 }

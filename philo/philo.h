@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 10:20:29 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/18 10:57:24 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 13:18:17 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,23 +68,35 @@ int		argument_is_number(int ac, char **av);
 //INIT
 int		init_philos(t_data *data);
 void	init_forks_and_mutexes(t_data *data);
+long	ft_atoi(const char *str);
+int		ft_strncmp(const char *s1, const char *s2, size_t n);
 
 //UTILS
-long	ft_atoi(const char *str);
 int		error_philo(char *msg, t_data *data);
 size_t	ft_get_time(void);
 int		ft_usleep(size_t miliseconds);
-int		ft_strncmp(const char *s1, const char *s2, size_t n);
 void	destroy_data(t_data *data);
+void	print_status(char *str, t_philo *philo);
+int		is_philos_live(t_philo *philo);
+int		start_dinner(t_data *data);
+void	wait_threads(t_data *data);
+int		dinner_running(t_data *data);
+void	end_dinner(t_data *data);
+
+//ONE_PHILO
+int		one_philo(t_data *data);
+void	*only_one(void *arg);
 
 //THREAD
-void	print_status(char *str, t_philo *philo);
-void	*supervisor(void *data);
+void	*monitor(void *arg);
+void	*routine(void *data);
 void	eating(t_philo *philo);
 void	sleep_and_think(t_philo *philo);
-void	*routine(void *data);
-int		start_dinner(t_data *data);
-int		is_philos_live(t_philo *philo);
 int		is_philo_full(t_philo *philo);
+
+//EATING
+void	hold(t_philo *philo);
+void	eating(t_philo *philo);
+void	drop(t_philo *philo);
 
 #endif

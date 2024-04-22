@@ -6,11 +6,50 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:45:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/18 16:20:43 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 12:39:53 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+long	ft_atoi(const char *str)
+{
+	int		i;
+	long	result;
+	long	signal;
+
+	signal = 1;
+	i = 0;
+	result = 0;
+	while ((str[i] >= 9 && str[i] <= 13) || (str[i] == ' '))
+		i++;
+	if ((str[i] == '+' || str[i] == '-'))
+	{
+		if (str[i] == '-')
+			signal = signal * -1;
+		i++;
+	}
+	while ((str[i] >= '0' && str[i] <= '9'))
+	{
+		result = result * 10 + str[i] - '0';
+		i++;
+	}
+	return (result * signal);
+}
+
+int	ft_strncmp(const char *s1, const char *s2, size_t n)
+{
+	size_t	i;
+
+	i = 0;
+	while (((s1[i]) || (s2[i])) && (i < n))
+	{
+		if (s1[i] != s2[i])
+			return ((unsigned char)s1[i] - (unsigned char)s2[i]);
+		i++;
+	}
+	return (0);
+}
 
 void	init_forks_and_mutexes(t_data *data)
 {

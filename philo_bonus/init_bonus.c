@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:20:38 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 16:39:06 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 19:19:50 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ int	init_philos(t_table *table)
 		table->philo[i].table = table;
 		table->philo[i].pid = -1;
 		table->philo[i].dead_time = 0;
+		table->philo[i].live = 1;
 		i++;
 	}
 	return (1);

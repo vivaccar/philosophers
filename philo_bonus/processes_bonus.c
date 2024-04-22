@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:34:24 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 16:43:02 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 19:40:52 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	print_message(t_philo *philo, char *message)
 
 	time = ft_get_time() - philo->table->start_time;
 	sem_wait(philo->table->print);
-	printf("%zu %i %s\n", philo->id, message);
+	printf("%zu %i %s\n", time, philo->id, message);
 	if (ft_strncmp(message, DIED, 4))
 		sem_post(philo->table->print);
 }
@@ -74,7 +74,7 @@ void	start_to_eat(t_philo *philo)
 		return ;
 	pthread_detach(philo->td);
 	if (philo->id % 2 == 0)
-		ft_usleep(20);
+		ft_usleep(15);
 	while (1)
 	{
 		hold(philo);

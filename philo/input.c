@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:21 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 12:48:34 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 16:51:42 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,47 +36,47 @@ int	argument_is_number(int ac, char **av)
 	return (1);
 }
 
-int	check_overflow_and_signal(t_data *data)
+int	check_overflow_and_signal(t_table *table)
 {
-	if (data->n_philos < 1)
+	if (table->n_philos < 1)
 		return (error_philo("Error: Must have at least 1 philosopher\n", NULL));
-	if (data->time_to_die <= 0 || data->time_to_eat <= 0
-		|| data->time_to_sleep <= 0)
+	if (table->time_to_die <= 0 || table->time_to_eat <= 0
+		|| table->time_to_sleep <= 0)
 		return (error_philo("Error: argument less than 1!\n", NULL));
-	if (data->n_philos > INT_MAX || data->repeat > INT_MAX
-		|| data->time_to_eat > INT_MAX || data->time_to_sleep > INT_MAX
-		|| data->time_to_die > INT_MAX)
+	if (table->n_philos > INT_MAX || table->repeat > INT_MAX
+		|| table->time_to_eat > INT_MAX || table->time_to_sleep > INT_MAX
+		|| table->time_to_die > INT_MAX)
 		return (error_philo("Error: INT_MAX is 2147483647!\n", NULL));
 	return (1);
 }
 
-int	init_data(char **av, t_data *data)
+int	init_table(char **av, t_table *table)
 {
-	data->n_philos = ft_atoi(av[1]);
-	data->time_to_die = ft_atoi(av[2]);
-	data->time_to_eat = ft_atoi(av[3]);
-	data->time_to_sleep = ft_atoi(av[4]);
-	data->live = 1;
-	data->dinner_running = 1;
-	data->th_created = 0;
+	table->n_philos = ft_atoi(av[1]);
+	table->time_to_die = ft_atoi(av[2]);
+	table->time_to_eat = ft_atoi(av[3]);
+	table->time_to_sleep = ft_atoi(av[4]);
+	table->live = 1;
+	table->dinner_running = 1;
+	table->th_created = 0;
 	if (av[5] && ft_atoi(av[5]) > 0)
-		data->repeat = ft_atoi(av[5]);
+		table->repeat = ft_atoi(av[5]);
 	else if (!av[5])
-		data->repeat = -1;
+		table->repeat = -1;
 	else
 		return (error_philo("Error: argument less than 1!\n", NULL));
-	if (!check_overflow_and_signal(data))
+	if (!check_overflow_and_signal(table))
 		return (0);
 	return (1);
 }
 
-int	init_input(int ac, char **av, t_data *data)
+int	init_input(int ac, char **av, t_table *table)
 {
 	if (ac != 5 && ac != 6)
 		return (error_philo("Error: Invalid number of arguments!\n", NULL));
 	if (!argument_is_number(ac, av))
 		return (error_philo("Error: Arguments must be numbers!\n", NULL));
-	if (!init_data(av, data))
+	if (!init_table(av, table))
 		return (0);
 	return (1);
 }

@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 10:20:29 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 13:18:17 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 18:03:01 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,6 @@
 # define THINK "is thinking"
 # define DIED "died"
 
-struct		s_data;
-
 typedef struct s_philo
 {
 	pthread_t			td;
@@ -35,13 +33,13 @@ typedef struct s_philo
 	pthread_mutex_t		*left_fork;
 	pthread_mutex_t		*right_fork;
 	pthread_mutex_t		philo_mtx;
-	struct s_data		*data;
+	struct s_table		*table;
 	size_t				dead_time;
 	int					meals;
 	int					full;
 }					t_philo;
 
-typedef struct s_data
+typedef struct s_table
 {
 	long			n_philos;
 	long			time_to_die;
@@ -57,39 +55,39 @@ typedef struct s_data
 	pthread_t		monitor;
 	pthread_mutex_t	table_mtx;
 	pthread_mutex_t	print_mtx;
-}				t_data;
+}				t_table;
 
 //INPUT
-int		init_input(int ac, char **av, t_data *data);
-int		init_data(char **av, t_data *data);
-int		check_overflow_and_signal(t_data *data);
+int		init_input(int ac, char **av, t_table *table);
+int		init_table(char **av, t_table *table);
+int		check_overflow_and_signal(t_table *table);
 int		argument_is_number(int ac, char **av);
 
 //INIT
-int		init_philos(t_data *data);
-void	init_forks_and_mutexes(t_data *data);
+int		init_philos(t_table *table);
+void	init_forks_and_mutexes(t_table *table);
 long	ft_atoi(const char *str);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 
 //UTILS
-int		error_philo(char *msg, t_data *data);
+int		error_philo(char *msg, t_table *table);
 size_t	ft_get_time(void);
 int		ft_usleep(size_t miliseconds);
-void	destroy_data(t_data *data);
+void	destroy_table(t_table *table);
 void	print_status(char *str, t_philo *philo);
 int		is_philos_live(t_philo *philo);
-int		start_dinner(t_data *data);
-void	wait_threads(t_data *data);
-int		dinner_running(t_data *data);
-void	end_dinner(t_data *data);
+int		start_dinner(t_table *table);
+void	wait_threads(t_table *table);
+int		dinner_running(t_table *table);
+void	end_dinner(t_table *table);
 
 //ONE_PHILO
-int		one_philo(t_data *data);
+int		one_philo(t_table *table);
 void	*only_one(void *arg);
 
 //THREAD
 void	*monitor(void *arg);
-void	*routine(void *data);
+void	*routine(void *table);
 void	eating(t_philo *philo);
 void	sleep_and_think(t_philo *philo);
 int		is_philo_full(t_philo *philo);

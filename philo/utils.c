@@ -6,23 +6,23 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 12:41:45 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/22 19:36:18 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	wait_threads(t_data *data)
+void	wait_threads(t_table *table)
 {
 	while (1)
 	{
-		pthread_mutex_lock(&data->table_mtx);
-		if (data->th_created)
+		pthread_mutex_lock(&table->table_mtx);
+		if (table->th_created)
 		{
-			pthread_mutex_unlock(&data->table_mtx);
+			pthread_mutex_unlock(&table->table_mtx);
 			break ;
 		}
-		pthread_mutex_unlock(&data->table_mtx);
+		pthread_mutex_unlock(&table->table_mtx);
 		usleep(1);
 	}
 }
@@ -38,39 +38,35 @@ size_t	ft_get_time(void)
 
 int	ft_usleep(size_t miliseconds)
 {
-	size_t	start;
-
-	start = ft_get_time();
-	while ((ft_get_time() - start) < miliseconds)
-		usleep (500);
+	usleep(1000 * miliseconds);
 	return (0);
 }
 
-int	error_philo(char *msg, t_data *data)
+int	error_philo(char *msg, t_table *table)
 {
 	printf("%s", msg);
-	if (data)
-		free(data->philo);
-	if (data)
-		free(data->forks);
+	if (table)
+		free(table->philo);
+	if (table)
+		free(table->forks);
 	return (0);
 }
 
-void	destroy_data(t_data *data)
+void	destroy_table(t_table *table)
 {
 	int	i;
 
 	i = 0;
-	while (i < data->n_philos)
+	while (i < table->n_philos)
 	{
-		pthread_mutex_destroy(&data->forks[i]);
-		pthread_mutex_destroy(&data->philo[i].philo_mtx);
+		pthread_mutex_destroy(&table->forks[i]);
+		pthread_mutex_destroy(&table->philo[i].philo_mtx);
 		i++;
 	}
-	pthread_mutex_destroy(&data->table_mtx);
-	pthread_mutex_destroy(&data->print_mtx);
-	if (data)
-		free(data->philo);
-	if (data)
-		free(data->forks);
+	pthread_mutex_destroy(&table->table_mtx);
+	pthread_mutex_destroy(&table->print_mtx);
+	if (table)
+		free(table->philo);
+	if (table)
+		free(table->forks);
 }

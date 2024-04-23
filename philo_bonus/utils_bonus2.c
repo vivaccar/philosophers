@@ -6,7 +6,7 @@
 /*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:32:02 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 21:25:10 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/23 11:52:07 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,23 +42,8 @@ int	is_philo_full(t_philo *philo)
 void	destroy_data(t_table *table)
 {
 	sem_close(table->full);
-	sem_close(table->death);
 	sem_close(table->time);
 	sem_close(table->forks);
 	sem_close(table->print);
 	free(table->philo);
-}
-
-void	wait_for_posts(t_table *table)
-{
-	int	i;
-
-	i = 0;
-	sem_post(table->death);
-	while (i < table->n_philos)
-	{
-		sem_wait(table->death);
-		i++;
-	}
-	sem_wait(table->death);
 }

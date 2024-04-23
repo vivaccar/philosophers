@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 16:28:26 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 18:03:10 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/23 11:52:27 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ typedef struct s_table
 	sem_t				*forks;
 	sem_t				*print;
 	sem_t				*time;
-	sem_t				*death;
 	sem_t				*full;
 }						t_table;
 
@@ -73,15 +72,14 @@ void	print_message(t_philo *philo, char *message);
 void	*check_if_died(void *arg);
 void	start_to_eat(t_philo *philo);
 int		create_processes(t_table *table);
+void	wait_exit(t_table *table);
 
 //UTILS
-void	wait_for_posts(t_table *table);
 void	destroy_data(t_table *table);
 int		is_philo_full(t_philo *philo);
 int		is_philo_live(t_philo *philo);
 int		ft_usleep(size_t miliseconds);
 size_t	ft_get_time(void);
-void	wait_for_kill(void);
 
 //EATING
 void	hold(t_philo *philo);

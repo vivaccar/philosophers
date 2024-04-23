@@ -6,7 +6,7 @@
 /*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:34:24 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 21:50:21 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/23 11:48:42 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,34 +31,30 @@ void	print_message(t_philo *philo, char *message)
 	time = ft_get_time() - philo->table->start_time;
 	sem_wait(philo->table->print);
 	printf("%zu %i %s\n", time, philo->id, message);
-	if (ft_strncmp(message, DIED, 4))
-		sem_post(philo->table->print);
+	//if (ft_strncmp(message, DIED, 4))
+	sem_post(philo->table->print);
+	/*else
+	{
+		destroy_data(philo->table);
+		return ;
+	}*/
 }
 
 void	*check_if_died(void *arg)
 {
 	t_philo	*philo;
-	int		i;
 
-	i = 0;
 	philo = (t_philo *)arg;
 	while (1)
 	{
 		if (!is_philo_live(philo))
 		{
 			print_message(philo, DIED);
-			while (i < philo->table->n_philos)
-			{
-				sem_post(philo->table->death);
-				i++;
-			}
-			break ;
+			destroy_data(philo->table);
+			exit(0);
 		}
 		else if (is_philo_full(philo))
-		{
-			sem_post(philo->table->death);
-			break ;
-		}
+			return (NULL);
 		usleep(1);
 	}
 	return (NULL);
@@ -86,21 +82,46 @@ void	start_to_eat(t_philo *philo)
 		if (i == philo->table->repeat)
 			break ;
 	}
-	wait_for_kill();
+	destroy_data(philo->table);
+	exit(0);
 }
 
-int	create_processes(t_table *table)
+void	wait_exit(t_table *table)
 {
-	int	i;
+	int		status;
+	pid_t	end_pid;
 
-	i = 0;
-	table->start_time = ft_get_time();
-	while (i < table->n_philos)
+	while (1)
 	{
-		table->philo[i].pid = fork();
-		if (table->philo[i].pid == 0)
-			start_to_eat(&table->philo[i]);
-		i++;
+		end_pid = waitpid(-1, &status, 0);
+		if (end_pid > 0)
+		{
+			if (WIFEXITED(status))
+			{
+				kill_processes(table);
+				break;
+			}
+		}
+		else if (end_pid == -1)
+		{
+			destroy_data(table);
+			exit(1);
+		}
 	}
-	return (0);
+}
+
+int create_processes(t_table *table)
+{
+    int i;
+    
+    i = 0;
+    table->start_time = ft_get_time();
+    while (i < table->n_philos)
+    {
+        table->philo[i].pid = fork();
+        if (table->philo[i].pid == 0)
+            start_to_eat(&table->philo[i]);
+        i++;
+    }
+    return (0);
 }

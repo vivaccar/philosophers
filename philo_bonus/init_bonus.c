@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_bonus.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:20:38 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 19:19:50 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/23 11:52:20 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,10 @@ void	init_semaphores(t_table *table)
 	sem_unlink("forks");
 	sem_unlink("print");
 	sem_unlink("time");
-	sem_unlink("death");
 	sem_unlink("full");
 	table->forks = sem_open("forks", O_CREAT, 0600, table->n_philos);
 	table->print = sem_open("print", O_CREAT, 0600, 1);
 	table->time = sem_open("time", O_CREAT, 0600, 1);
-	table->death = sem_open("death", O_CREAT, 0600, 0);
 	table->full = sem_open("full", O_CREAT, 0600, 1);
 }
 

@@ -6,7 +6,7 @@
 /*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:34:24 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/23 11:48:42 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/23 17:48:18 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,81 +31,77 @@ void	print_message(t_philo *philo, char *message)
 	time = ft_get_time() - philo->table->start_time;
 	sem_wait(philo->table->print);
 	printf("%zu %i %s\n", time, philo->id, message);
-	//if (ft_strncmp(message, DIED, 4))
-	sem_post(philo->table->print);
-	/*else
-	{
-		destroy_data(philo->table);
-		return ;
-	}*/
+	if (ft_strncmp(message, DIED, 4))
+		sem_post(philo->table->print);
 }
 
-void	*check_if_died(void *arg)
+void	monitoring(t_philo *philo)
 {
-	t_philo	*philo;
-
-	philo = (t_philo *)arg;
 	while (1)
 	{
 		if (!is_philo_live(philo))
 		{
 			print_message(philo, DIED);
 			destroy_data(philo->table);
-			exit(0);
+			exit(1) ;
 		}
 		else if (is_philo_full(philo))
-			return (NULL);
+			return ;
 		usleep(1);
+	}
+	return ;
+}
+
+int	get_live(t_philo *philo)
+{
+	int	live;
+
+	sem_wait(philo->table->time);
+	live = philo->live;
+	sem_post(philo->table->time);
+	return (live);
+}
+
+void	*routine(void *arg)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *)arg;
+	print_message(philo, THINK);
+	if (philo->id % 2 == 0)
+		mili_sleep(15);
+	while (get_live(philo))
+	{
+		hold(philo);
+		eat(philo);
+		drop(philo);
+		if (is_philo_full(philo))
+			return (NULL);
+		sleep_and_think(philo);
 	}
 	return (NULL);
 }
 
 void	start_to_eat(t_philo *philo)
 {
-	int	i;
-
-	i = 0;
 	philo->dead_time = ft_get_time() + philo->table->time_to_die;
-	if (pthread_create(&philo->td, NULL, &check_if_died, philo))
+	if (pthread_create(&philo->td, NULL, &routine, philo))
 		return ;
-	pthread_detach(philo->td);
-	print_message(philo, THINK);
-	if (philo->id % 2 == 0)
-		ft_usleep(15);
-	while (1)
-	{
-		hold(philo);
-		eat(philo);
-		drop(philo);
-		sleep_and_think(philo);
-		i++;
-		if (i == philo->table->repeat)
-			break ;
-	}
+	monitoring(philo);
+	if (pthread_join(philo->td, NULL))
+		return ;
 	destroy_data(philo->table);
-	exit(0);
+	exit (0);
 }
 
 void	wait_exit(t_table *table)
 {
-	int		status;
-	pid_t	end_pid;
-
 	while (1)
 	{
-		end_pid = waitpid(-1, &status, 0);
-		if (end_pid > 0)
+		if (waitpid(-1, NULL, WNOHANG) != 0)
 		{
-			if (WIFEXITED(status))
-			{
-				kill_processes(table);
-				break;
-			}
-		}
-		else if (end_pid == -1)
-		{
-			destroy_data(table);
-			exit(1);
+			kill_processes(table);
+			break;
 		}
 	}
 }

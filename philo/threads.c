@@ -6,7 +6,7 @@
 /*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 21:43:43 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/23 17:20:19 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	try_eat(t_philo *philo)
 	}
 	pthread_mutex_unlock(&philo->philo_mtx);
 	print_status(SLEEP, philo);
-	ft_usleep(philo->table->time_to_sleep);
+	mili_sleep(philo->table->time_to_sleep);
 	print_status(THINK, philo);
 }
 
@@ -40,7 +40,7 @@ void	*routine(void *table)
 	pthread_mutex_unlock(&philo->philo_mtx);
 	print_status(THINK, philo);
 	if (philo->id % 2 == 0)
-		ft_usleep(10);
+		mili_sleep(10);
 	while (!is_philo_full(philo) && is_philos_live(philo))
 		try_eat(philo);
 	return (NULL);

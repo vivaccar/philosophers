@@ -6,7 +6,7 @@
 /*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 15:32:02 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/23 11:52:07 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/23 17:13:42 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,4 +46,11 @@ void	destroy_data(t_table *table)
 	sem_close(table->forks);
 	sem_close(table->print);
 	free(table->philo);
+}
+
+void	ft_exit(char *msg, t_table *table)
+{
+	printf("%s", msg);
+	destroy_data(table);
+	exit(0);
 }

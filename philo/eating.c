@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   eating.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 12:37:35 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 19:32:42 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/23 17:20:19 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void	eating(t_philo *philo)
 	philo->dead_time = ft_get_time() + philo->table->time_to_die;
 	pthread_mutex_unlock(&philo->philo_mtx);
 	print_status(EAT, philo);
-	ft_usleep(philo->table->time_to_eat);
+	mili_sleep(philo->table->time_to_eat);
 }
 
 void	drop(t_philo *philo)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 13:25:17 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 16:27:56 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/23 17:35:56 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,12 @@ int	init_data(char **av, t_table *table)
 	table->time_to_die = ft_atoi(av[2]);
 	table->time_to_eat = ft_atoi(av[3]);
 	table->time_to_sleep = ft_atoi(av[4]);
-	if (av[5] && ft_atoi(av[5]) >= 0)
+	if (av[5] && ft_atoi(av[5]) > 0)
 		table->repeat = ft_atoi(av[5]);
 	else if (!av[5])
 		table->repeat = -1;
 	else
-		return (error_philo("Error: arguments less than 0\n", NULL));
+		return (error_philo("Error: arguments less than 1\n", NULL));
 	if (!check_overflow_and_signal(table))
 		return (0);
 	return (1);

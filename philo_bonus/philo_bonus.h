@@ -6,7 +6,7 @@
 /*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 16:28:26 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/23 11:52:27 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/23 17:14:46 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,9 @@ void	wait_exit(t_table *table);
 void	destroy_data(t_table *table);
 int		is_philo_full(t_philo *philo);
 int		is_philo_live(t_philo *philo);
-int		ft_usleep(size_t miliseconds);
+void	mili_sleep(size_t miliseconds);
 size_t	ft_get_time(void);
+void	ft_exit(char *msg, t_table *table);
 
 //EATING
 void	hold(t_philo *philo);

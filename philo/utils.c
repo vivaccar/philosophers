@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 19:36:18 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/23 17:19:28 by vinivaccari      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,9 @@ size_t	ft_get_time(void)
 	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
-int	ft_usleep(size_t miliseconds)
+void	mili_sleep(size_t miliseconds)
 {
 	usleep(1000 * miliseconds);
-	return (0);
 }
 
 int	error_philo(char *msg, t_table *table)

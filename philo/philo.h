@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
+/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 10:20:29 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/23 17:19:42 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/24 17:10:00 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ typedef struct s_philo
 	size_t				dead_time;
 	int					meals;
 	int					full;
+	int					is_eating;
 }					t_philo;
 
 typedef struct s_table
@@ -72,10 +73,10 @@ int		ft_strncmp(const char *s1, const char *s2, size_t n);
 //UTILS
 int		error_philo(char *msg, t_table *table);
 size_t	ft_get_time(void);
-void	mili_sleep(size_t miliseconds);
+void	mili_sleep(size_t miliseconds, t_table *table);
 void	destroy_table(t_table *table);
 void	print_status(char *str, t_philo *philo);
-int		is_philos_live(t_philo *philo);
+int		is_philos_live(t_table *table);
 int		start_dinner(t_table *table);
 void	wait_threads(t_table *table);
 int		dinner_running(t_table *table);

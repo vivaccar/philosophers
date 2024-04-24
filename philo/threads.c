@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vinivaccari <vinivaccari@student.42.fr>    +#+  +:+       +#+        */
+/*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/23 17:20:19 by vinivaccari      ###   ########.fr       */
+/*   Updated: 2024/04/24 17:11:49 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	try_eat(t_philo *philo)
 	}
 	pthread_mutex_unlock(&philo->philo_mtx);
 	print_status(SLEEP, philo);
-	mili_sleep(philo->table->time_to_sleep);
+	mili_sleep(philo->table->time_to_sleep, philo->table);
 	print_status(THINK, philo);
 }
 
@@ -35,13 +35,14 @@ void	*routine(void *table)
 	t_philo			*philo;
 
 	philo = (t_philo *)table;
+	wait_threads(philo->table);
 	pthread_mutex_lock(&philo->philo_mtx);
 	philo->dead_time = philo->table->time_to_die + ft_get_time();
 	pthread_mutex_unlock(&philo->philo_mtx);
 	print_status(THINK, philo);
 	if (philo->id % 2 == 0)
-		mili_sleep(10);
-	while (!is_philo_full(philo) && is_philos_live(philo))
+		mili_sleep(20, philo->table);
+	while (!is_philo_full(philo) && is_philos_live(philo->table))
 		try_eat(philo);
 	return (NULL);
 }
@@ -60,7 +61,7 @@ void	*monitor(void *arg)
 			i = 0;
 		pthread_mutex_lock(&table->philo[i].philo_mtx);
 		if (ft_get_time() >= table->philo[i].dead_time
-			&& table->philo[i].dead_time != 0)
+			&& table->philo[i].dead_time != 0 && !table->philo[i].is_eating)
 		{
 			print_status("died", &table->philo[i]);
 			pthread_mutex_unlock(&table->philo[i].philo_mtx);

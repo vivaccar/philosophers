@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:45:03 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 16:47:47 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/24 13:46:35 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ void	init_forks_and_mutexes(t_table *table)
 		table->philo[i].table = table;
 		table->philo[i].meals = 0;
 		table->philo[i].full = 0;
+		table->philo[i].is_eating = 0;
 		table->philo[i].dead_time = ft_get_time() + table->time_to_die;
 		pthread_mutex_init(&table->forks[i], NULL);
 		pthread_mutex_init(&table->philo[i].philo_mtx, NULL);

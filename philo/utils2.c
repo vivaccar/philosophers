@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 12:42:19 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 16:49:59 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/24 17:11:30 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,16 +45,16 @@ int	is_philo_full(t_philo *philo)
 	return (full_signal);
 }
 
-int	is_philos_live(t_philo *philo)
+int	is_philos_live(t_table *table)
 {
 	int	dead_signal;
 
-	pthread_mutex_lock(&philo->table->table_mtx);
-	if (!philo->table->live)
+	pthread_mutex_lock(&table->table_mtx);
+	if (!table->live)
 		dead_signal = 0;
 	else
 		dead_signal = 1;
-	pthread_mutex_unlock(&philo->table->table_mtx);
+	pthread_mutex_unlock(&table->table_mtx);
 	return (dead_signal);
 }
 
@@ -62,16 +62,19 @@ void	print_status(char *str, t_philo *philo)
 {
 	size_t	time;
 
-	time = ft_get_time() - philo->table->start_time;
 	pthread_mutex_lock(&philo->table->print_mtx);
-	if (!ft_strncmp(str, "died", 4) && is_philos_live(philo))
+	if (!ft_strncmp(str, "died", 4) && is_philos_live(philo->table))
 	{
 		pthread_mutex_lock(&philo->table->table_mtx);
+		time = ft_get_time() - philo->table->start_time;
 		printf("%zu %i %s\n", time, philo->id, str);
 		philo->table->live = 0;
 		pthread_mutex_unlock(&philo->table->table_mtx);
 	}
-	else if (is_philos_live(philo))
+	else if (is_philos_live(philo->table))
+	{
+		time = ft_get_time() - philo->table->start_time;
 		printf("%zu %i %s\n", time, philo->id, str);
+	}
 	pthread_mutex_unlock(&philo->table->print_mtx);
 }

@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:21 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/22 16:51:42 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/24 19:00:13 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ int	init_table(char **av, t_table *table)
 	table->live = 1;
 	table->dinner_running = 1;
 	table->th_created = 0;
+	table->thread_error = 0;
 	if (av[5] && ft_atoi(av[5]) > 0)
 		table->repeat = ft_atoi(av[5]);
 	else if (!av[5])

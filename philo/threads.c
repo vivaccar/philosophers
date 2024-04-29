@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 14:46:49 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/24 17:11:49 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/24 19:19:49 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,8 @@ void	*routine(void *table)
 	t_philo			*philo;
 
 	philo = (t_philo *)table;
-	wait_threads(philo->table);
+	if (!wait_threads(philo->table))
+		return (NULL);
 	pthread_mutex_lock(&philo->philo_mtx);
 	philo->dead_time = philo->table->time_to_die + ft_get_time();
 	pthread_mutex_unlock(&philo->philo_mtx);
@@ -54,7 +55,8 @@ void	*monitor(void *arg)
 
 	i = 0;
 	table = (t_table *)arg;
-	wait_threads(table);
+	if (!wait_threads(table))
+		return (NULL);
 	while (dinner_running(table))
 	{
 		if (i == table->n_philos)
@@ -82,7 +84,7 @@ int	create_and_join_threads(t_table *table)
 	{
 		if (pthread_create(&table->philo[i].td,
 				NULL, &routine, &table->philo[i]))
-			return (error_philo("Error: Thread Create.\n", table));
+			return (thread_error(table));
 		i++;
 	}
 	pthread_mutex_lock(&table->table_mtx);

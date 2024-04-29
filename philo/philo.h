@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 10:20:29 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/24 17:10:00 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/24 19:32:04 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ typedef struct s_table
 	long			repeat;
 	int				live;
 	int				th_created;
+	int				thread_error;
 	int				dinner_running;
 	size_t			start_time;
 	t_philo			*philo;
@@ -66,7 +67,7 @@ int		argument_is_number(int ac, char **av);
 
 //INIT
 int		init_philos(t_table *table);
-void	init_forks_and_mutexes(t_table *table);
+void	init_each_philo(t_table *table);
 long	ft_atoi(const char *str);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 
@@ -78,7 +79,7 @@ void	destroy_table(t_table *table);
 void	print_status(char *str, t_philo *philo);
 int		is_philos_live(t_table *table);
 int		start_dinner(t_table *table);
-void	wait_threads(t_table *table);
+int		wait_threads(t_table *table);
 int		dinner_running(t_table *table);
 void	end_dinner(t_table *table);
 
@@ -97,5 +98,11 @@ int		is_philo_full(t_philo *philo);
 void	hold(t_philo *philo);
 void	eating(t_philo *philo);
 void	drop(t_philo *philo);
+
+//ERROR
+int		fork_mutex_error(t_table *table, int n);
+int		philo_mutex_error(t_table *table, int n);
+int		table_mutex_error(t_table *table, int flag);
+int		thread_error(t_table *table);
 
 #endif

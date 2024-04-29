@@ -6,17 +6,19 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/30 13:19:47 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/24 17:10:39 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/24 19:26:25 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	wait_threads(t_table *table)
+int	wait_threads(t_table *table)
 {
 	while (1)
 	{
 		pthread_mutex_lock(&table->table_mtx);
+		if (table->thread_error)
+			return (0);
 		if (table->th_created)
 		{
 			pthread_mutex_unlock(&table->table_mtx);
@@ -25,6 +27,7 @@ void	wait_threads(t_table *table)
 		pthread_mutex_unlock(&table->table_mtx);
 		usleep(1);
 	}
+	return (1);
 }
 
 size_t	ft_get_time(void)
@@ -69,8 +72,6 @@ void	destroy_table(t_table *table)
 	}
 	pthread_mutex_destroy(&table->table_mtx);
 	pthread_mutex_destroy(&table->print_mtx);
-	if (table)
-		free(table->philo);
-	if (table)
-		free(table->forks);
+	free(table->philo);
+	free(table->forks);
 }

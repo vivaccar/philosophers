@@ -6,7 +6,7 @@
 /*   By: vivaccar <vivaccar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 12:37:35 by vivaccar          #+#    #+#             */
-/*   Updated: 2024/04/24 17:07:03 by vivaccar         ###   ########.fr       */
+/*   Updated: 2024/04/29 12:51:41 by vivaccar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,22 +14,12 @@
 
 void	hold(t_philo *philo)
 {
-	if (philo->table->n_philos % 2 == 0)
+	if (philo->id % 2 == 0)
 	{
-		if (philo->id % 2 == 0)
-		{
-			pthread_mutex_lock(philo->left_fork);
-			print_status(FORKS, philo);
-			pthread_mutex_lock(philo->right_fork);
-			print_status(FORKS, philo);
-		}
-		else
-		{
-			pthread_mutex_lock(philo->right_fork);
-			print_status(FORKS, philo);
-			pthread_mutex_lock(philo->left_fork);
-			print_status(FORKS, philo);
-		}
+		pthread_mutex_lock(philo->left_fork);
+		print_status(FORKS, philo);
+		pthread_mutex_lock(philo->right_fork);
+		print_status(FORKS, philo);
 	}
 	else
 	{
